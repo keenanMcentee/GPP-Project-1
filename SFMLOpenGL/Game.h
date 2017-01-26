@@ -25,6 +25,7 @@ class Game
 {
 public:
 	Game();
+	Game(sf::ContextSettings settings);
 	~Game();
 	void run();
 private:

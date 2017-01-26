@@ -2,6 +2,9 @@
 
 int main(void)
 {
-	Game& game = Game();
+	sf::ContextSettings settings;
+	settings.depthBits = 32u;
+	settings.antialiasingLevel = 4u;
+	Game& game = Game(settings);
 	game.run();
 }
