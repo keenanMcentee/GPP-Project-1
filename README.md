@@ -1,6 +1,7 @@
 # README #
 
 This is LAB 11 which is the final lab within the lab series. Over the past few months we've created many different applications. This project defines an Cube, Vertex and Fragment Shaders, Texture and uses the GLM Math Library to perform transformations. As such its a completed 3D cube project with rotations.
+Modify this example and experiment with rotate, scale and translate functions (see https://glm.g-truc.net/0.9.2/api/a00245.html#ga4683c446c8432476750ade56f2537397)
 
 
 ### What is this repository for? ###
