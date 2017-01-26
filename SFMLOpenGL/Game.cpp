@@ -16,8 +16,8 @@ GLuint	vsid,		// Vertex Shader ID
 
 //const string filename = "coordinates.tga";
 //const string filename = "cube.tga";
-const string filename = "grid.tga";
-//const string filename = "grid_wip.tga";
+//const string filename = "grid.tga";
+const string filename = "grid_wip.tga";
 //const string filename = "minecraft.tga";
 //const string filename = "texture.tga";
 //const string filename = "texture_2.tga";
@@ -177,14 +177,14 @@ void Game::initialize()
 		"out vec4 fColor;"
 		""
 		"void main() {"
-		"	vec4 lightColor = vec4(1.0f, 0.0f, 0.0f, 1.0f); "
+		//"	vec4 lightColor = vec4(1.0f, 0.0f, 0.0f, 1.0f); "
 		//"	fColor = vec4(0.50f, 0.50f, 0.50f, 1.0f);"
-		"	fColor = texture2D(f_texture, uv);"
+		//"	fColor = texture2D(f_texture, uv);"
 		//"	fColor = color * texture2D(f_texture, uv);"
 		//"	fColor = lightColor * texture2D(f_texture, uv);"
 		//"	fColor = color + texture2D(f_texture, uv);"
 		//"	fColor = color - texture2D(f_texture, uv);"
-		//"	fColor = color;"
+		"	fColor = color;"
 		"}"; //Fragment Shader Src
 
 	DEBUG_MSG("Setting Up Fragment Shader");
@@ -327,7 +327,7 @@ void Game::render()
 	//Set pointers for each parameter (with appropriate starting positions)
 	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml
 	glVertexAttribPointer(positionID, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	glVertexAttribPointer(colorID, 3, GL_FLOAT, GL_FALSE, 0, (VOID*)(3 * VERTICES * sizeof(GLfloat)));
+	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, (VOID*)(3 * VERTICES * sizeof(GLfloat)));
 	glVertexAttribPointer(uvID, 2, GL_FLOAT, GL_FALSE, 0, (VOID*)(((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat)));
 	
 	//Enable Arrays
