@@ -32,11 +32,17 @@ unsigned char* img_data;		// image data
 
 mat4 mvp, projection, view, model;			// Model View Projection
 
-Game::Game() : window(VideoMode(800, 600), "Introduction to OpenGL Texturing")
+Game::Game() : 
+	window(VideoMode(800, 600), 
+	"Introduction to OpenGL Texturing")
 {
 }
 
-Game::Game(sf::ContextSettings settings) : window(VideoMode(800, 600), "Introduction to OpenGL Texturing", sf::Style::Default, settings)
+Game::Game(sf::ContextSettings settings) : 
+	window(VideoMode(800, 600), 
+	"Introduction to OpenGL Texturing", 
+	sf::Style::Default, 
+	settings)
 {
 }
 
