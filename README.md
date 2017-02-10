@@ -47,7 +47,7 @@ http://www.sfml-dev.org/files/SFML-2.3.2-windows-vc14-32-bit.zip "SFML-2.3.2-win
 ### Installation and Environment Notes ###
 * OpenGL runtime DLL's ( `opengl32.dll` and `glu32.dll`) are located within `C:\Windows\System32` directory on 32-bit and `C:\Windows\SysWOW64` directory on 64-bit
 
-* Header files for GLUT (avoid if possible) `GL.h` and `GLU.h` are located in `C:\Program Files\Microsoft SDKs\Windows\v7.1A\Include` on 32 bit `C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include` on 64-bit
+* Header files for GLUT (avoid GLUT use GLEW http://stackoverflow.com/questions/15613978/difference-of-freeglut-vs-glew) `GL.h` and `GLU.h` are located in `C:\Program Files\Microsoft SDKs\Windows\v7.1A\Include` on 32 bit `C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include` on 64-bit
 
 * Linker library files `OpenGL32.lib` and `GlU32.lib` are located in `C:\Program Files\Microsoft SDKs\Windows\v7.1A\Lib` on 32-bit `C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Lib` on 64-bit
 
