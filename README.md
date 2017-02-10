@@ -44,6 +44,10 @@ http://www.sfml-dev.org/files/SFML-2.3.2-windows-vc14-32-bit.zip "SFML-2.3.2-win
 
 * List files that were downloaded `ls`
 
+### Installation and Environment Notes ###
+* OpenGL runtime DLL's ( `opengl32.dll` and `glu32.dll`) are located in `C:\Windows\System32` on 32-bit and `C:\Windows\SysWOW64` on 64-bit
+
+* 
 ### Who do I talk to? ###
 
 * philip.bourke@itcarlow.ie
