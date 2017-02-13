@@ -23,7 +23,7 @@ http://www.sfml-dev.org/files/SFML-2.3.2-windows-vc14-32-bit.zip "SFML-2.3.2-win
 * Download GLM Math Library from https://github.com/g-truc/glm/tags
 * Set environment variable for GLM
 	* Follow this guide https://support.microsoft.com/en-us/kb/310519
-	* Alternatively `SET GLM_SDK="C:\Users\#####\glm-0.9.7.2\glm\glm"`
+	* Alternatively `SET GLM_SDK="C:\Users\#####\glm-0.9.7.2"`
 * Select a project default target `x86` when running executable
 * If the project builds but does not `xcopy` the required dll's try moving your project to a directory you have full access to, see http://tinyurl.com/SFMLStarter for a guide on post build events.
 
