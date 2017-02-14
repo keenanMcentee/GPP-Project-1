@@ -166,6 +166,18 @@ xcopy $(GLEW_SDK)\bin\Release\Win32 $(TargetDir) /C /Y</Command>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
+    <None Include="Assets\Textures\cube.pdn" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Textures\coordinates.tga" />
+    <Image Include="Assets\Textures\cube.png" />
+    <Image Include="Assets\Textures\cube.tga" />
+    <Image Include="Assets\Textures\grid.tga" />
+    <Image Include="Assets\Textures\grid_wip.tga" />
+    <Image Include="Assets\Textures\minecraft.tga" />
+    <Image Include="Assets\Textures\texture.tga" />
+    <Image Include="Assets\Textures\texture_2.tga" />
+    <Image Include="Assets\Textures\uvtemplate.tga" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

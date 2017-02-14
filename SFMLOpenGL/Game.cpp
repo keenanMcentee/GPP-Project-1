@@ -14,14 +14,14 @@ GLuint	vsid,		// Vertex Shader ID
 		uvID,		// UV ID
 		mvpID;		// Model View Projection ID
 
-//const string filename = "coordinates.tga";
-//const string filename = "cube.tga";
-//const string filename = "grid.tga";
-const string filename = "grid_wip.tga";
-//const string filename = "minecraft.tga";
-//const string filename = "texture.tga";
-//const string filename = "texture_2.tga";
-//const string filename = "uvtemplate.tga";
+//const string filename = ".//Assets//Textures//coordinates.tga";
+//const string filename = ".//Assets//Textures//cube.tga";
+//const string filename = ".//Assets//Textures//grid.tga";
+const string filename = ".//Assets//Textures//grid_wip.tga";
+//const string filename = ".//Assets//Textures//minecraft.tga";
+//const string filename = ".//Assets//Textures//texture.tga";
+//const string filename = ".//Assets//Textures//texture_2.tga";
+//const string filename = ".//Assets//Textures//uvtemplate.tga";
 
 
 int width;			// Width of texture
@@ -123,10 +123,10 @@ void Game::initialize()
 	glGenVertexArrays(1, &vao); //Gen Vertex Array
 	glBindVertexArray(vao);
 
-	glGenBuffers(1, &vbo); //Gen Vertex Buffer
+	glGenBuffers(1, &vbo);		//Gen Vertex Buffer
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	//Vertices 3 x,y,z , Colors 4 RGBA, UV/ST 2
+	//Vertices (3) x,y,z , Colors (4) RGBA, UV/ST (2)
 	glBufferData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS) + (2 * UVS)) * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
 
 	glGenBuffers(1, &vib); //Gen Vertex Index Buffer
@@ -259,14 +259,14 @@ void Game::initialize()
 	//Bind to OpenGL
 	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexImage2D.xml
 	glTexImage2D(
-		GL_TEXTURE_2D,		//2D Texture Image
-		0,					//Mipmapping Level 
-		GL_RGBA,			//GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, GL_RGB, GL_BGR, GL_RGBA 
-		width,				//Width
-		height,				//Height
-		0,					//Border
-		GL_RGBA,			//Bitmap
-		GL_UNSIGNED_BYTE,	//Specifies Data type of image data
+		GL_TEXTURE_2D,			//2D Texture Image
+		0,						//Mipmapping Level 
+		GL_RGBA,				//GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, GL_RGB, GL_BGR, GL_RGBA 
+		width,					//Width
+		height,					//Height
+		0,						//Border
+		GL_RGBA,				//Bitmap
+		GL_UNSIGNED_BYTE,		//Specifies Data type of image data
 		img_data				//Image Data
 		);
 
@@ -289,8 +289,8 @@ void Game::initialize()
 	// Camera Matrix
 	view = lookAt(
 		vec3(0.0f, 4.0f, 10.0f),	// Camera (x,y,z), in World Space
-		vec3(0.0f, 0.0f, 0.0f),	// Camera looking at origin
-		vec3(0.0f, 1.0f, 0.0f)	// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
+		vec3(0.0f, 0.0f, 0.0f),		// Camera looking at origin
+		vec3(0.0f, 1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
 		);
 
 	// Model matrix
