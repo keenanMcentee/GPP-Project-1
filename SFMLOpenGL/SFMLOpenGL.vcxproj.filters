@@ -86,4 +86,18 @@
       <Filter>Assets\Textures</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="fragmentShader1.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="fragmentShader2.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="vertexShader0.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="fragmentShader3.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+  </ItemGroup>
 </Project>

@@ -179,6 +179,12 @@ xcopy $(GLEW_SDK)\bin\Release\Win32 $(TargetDir) /C /Y</Command>
     <Image Include="Assets\Textures\texture_2.tga" />
     <Image Include="Assets\Textures\uvtemplate.tga" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="fragmentShader1.txt" />
+    <Text Include="fragmentShader2.txt" />
+    <Text Include="fragmentShader3.txt" />
+    <Text Include="vertexShader0.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

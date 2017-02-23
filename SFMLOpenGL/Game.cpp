@@ -3,11 +3,11 @@
 
 GLuint	vsid,		// Vertex Shader ID
 		fsid,		// Fragment Shader ID
-		progID,		// Program ID
+		progID, progID2,progID3,		// Program ID
 		vao = 0,	// Vertex Array ID
 		vbo,		// Vertex Buffer ID
 		vib,		// Vertex Index Buffer
-		to,			// Texture ID 1 to 32
+		to,to2,to3,			// Texture ID 1 to 32
 		positionID,	// Position ID
 		colorID,	// Color ID
 		textureID,	// Texture ID
@@ -30,7 +30,7 @@ int comp_count;		// Component of texture
 
 unsigned char* img_data;		// image data
 
-mat4 mvp, projection, view, model;			// Model View Projection
+mat4 mvp, projection, view, model1, model2, model3, model4, model5;			// Model View Projection
 
 Game::Game() : 
 	window(VideoMode(800, 600), 
@@ -72,25 +72,25 @@ void Game::run()
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 			{
 				// Set Model Rotation
-				model = rotate(model, 0.01f, glm::vec3(0, 1, 0)); // Rotate
+				model1 = rotate(model1, 0.05f, glm::vec3(0, 1, 0)); // Rotate
 			}
 
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 			{
 				// Set Model Rotation
-				model = rotate(model, -0.01f, glm::vec3(0, 1, 0)); // Rotate
+				model1 = rotate(model1, -0.05f, glm::vec3(0, 1, 0)); // Rotate
 			}
 
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 			{
 				// Set Model Rotation
-				model = rotate(model, -0.01f, glm::vec3(1, 0, 0)); // Rotate
+				model1 = rotate(model1, -0.05f, glm::vec3(1, 0, 0)); // Rotate
 			}
 
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 			{
 				// Set Model Rotation
-				model = rotate(model, 0.01f, glm::vec3(1, 0, 0)); // Rotate
+				model1 = rotate(model1, 0.05f, glm::vec3(1, 0, 0)); // Rotate
 			}
 		}
 		update();
@@ -107,14 +107,28 @@ void Game::run()
 void Game::initialize()
 {
 	isRunning = true;
-	GLint isCompiled = 0;
-	GLint isLinked = 0;
 
 	glewInit();
 
 	//Copy UV's to all faces
 	for (int i = 1; i < 6; i++)
 		memcpy(&uvs[i * 4 * 2], &uvs[0], 2 * 4 * sizeof(GLfloat));
+
+
+	glm::vec2 translations[100];
+	int index = 0;
+	GLfloat offset = 0.1f;
+	for (GLint y = -10; y < 10; y += 2)
+	{
+		for (GLint x = -10; x < 10; x += 2)
+		{
+			glm::vec2 translation;
+			translation.x = (GLfloat)x / 10.0f + offset;
+			translation.y = (GLfloat)y / 10.0f + offset;
+			translations[index++] = translation;
+		}
+	}
+	
 
 	DEBUG_MSG(glGetString(GL_VENDOR));
 	DEBUG_MSG(glGetString(GL_RENDERER));
@@ -135,28 +149,86 @@ void Game::initialize()
 	//Indices to be drawn
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * INDICES * sizeof(GLuint), indices, GL_STATIC_DRAW);
 
-	const char* vs_src = 
-		"#version 400\n\r"
-		""
-		//"layout(location = 0) in vec3 sv_position; //Use for individual Buffers"
-		//"layout(location = 1) in vec4 sv_color; //Use for individual Buffers"
-		//"layout(location = 2) in vec2 sv_texel; //Use for individual Buffers"
-		""
-		"in vec3 sv_position;"
-		"in vec4 sv_color;"
-		"in vec2 sv_uv;"
-		""
-		"out vec4 color;"
-		"out vec2 uv;"
-		""
-		"uniform mat4 sv_mvp;"
-		""
-		"void main() {"
-		"	color = sv_color;"
-		"	uv = sv_uv;"
-		//"	gl_Position = vec4(sv_position, 1);"
-		"	gl_Position = sv_mvp * vec4(sv_position, 1);"
-		"}"; //Vertex Shader Src
+	
+	createProg(progID, "vertexShader0.txt", "fragmentShader1.txt");
+
+	
+	createProg(progID2, "vertexShader0.txt", "fragmentShader2.txt");
+
+	
+	createProg(progID3, "vertexShader0.txt", "fragmentShader3.txt");
+	
+	
+
+	glEnable(GL_TEXTURE_2D);
+	glGenTextures(3, &to);
+	loadTexture(to, ".//Assets//Textures//grid_wip.tga");
+	loadTexture(to, ".//Assets//Textures//texture.tga");
+	loadTexture(to, ".//Assets//Textures//texture_2.tga");
+
+	// Projection Matrix 
+	projection = perspective(
+		45.0f,					// Field of View 45 degrees
+		4.0f / 3.0f,			// Aspect ratio
+		5.0f,					// Display Range Min : 0.1f unit
+		100.0f					// Display Range Max : 100.0f unit
+		);
+
+	// Camera Matrix
+	view = lookAt(
+		vec3(0.0f, 4.0f, 10.0f),	// Camera (x,y,z), in World Space
+		vec3(0.0f, 0.0f, 0.0f),		// Camera looking at origin
+		vec3(0.0f, 1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
+		);
+
+	// Model matrix
+	model1 = mat4(
+		1.0f					// Identity Matrix
+		);
+
+	// Model matrix
+	model2 = mat4(
+		1.0f					// Identity Matrix
+	);
+
+	// Model matrix
+	model3 = mat4(
+		1.0f					// Identity Matrix
+	);
+
+	// Model matrix
+	model4 = mat4(
+		1.0f					// Identity Matrix
+	);
+
+	// Model matrix
+	model5 = mat4(
+		1.0f					// Identity Matrix
+	);
+
+	model2 = translate(model2, vec3(5, 0, 0));
+	model3 = translate(model3, vec3(-5, 0, 0));
+	// Enable Depth Test
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_CULL_FACE);
+}
+void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fragmentShaderPath)
+{
+	GLint isCompiled = 0;
+	GLint isLinked = 0;
+
+
+	
+	ifstream vertexFile;
+	std::string vString;
+	std::stringstream vContent;
+	vertexFile.open(vertexShaderPath);
+	vContent << vertexFile.rdbuf();
+	vertexFile.close();
+	vString = vContent.str();
+	const char* vs_src = vString.c_str();
+		
 
 	DEBUG_MSG("Setting Up Vertex Shader");
 
@@ -176,26 +248,15 @@ void Game::initialize()
 		DEBUG_MSG("ERROR: Vertex Shader Compilation Error");
 	}
 
-	const char* fs_src =
-		"#version 400\n\r"
-		""
-		"uniform sampler2D f_texture;"
-		""
-		"in vec4 color;"
-		"in vec2 uv;"
-		""
-		"out vec4 fColor;"
-		""
-		"void main() {"
-		//"	vec4 lightColor = vec4(1.0f, 0.0f, 0.0f, 1.0f); "
-		//"	fColor = vec4(0.50f, 0.50f, 0.50f, 1.0f);"
-		//"	fColor = texture2D(f_texture, uv);"
-		//"	fColor = color * texture2D(f_texture, uv);"
-		//"	fColor = lightColor * texture2D(f_texture, uv);"
-		//"	fColor = color + texture2D(f_texture, uv);"
-		//"	fColor = color - texture2D(f_texture, uv);"
-		"	fColor = color;"
-		"}"; //Fragment Shader Src
+	ifstream fragFile;
+	std::string fString;
+	std::stringstream fContent;
+	fragFile.open(fragmentShaderPath);
+	fContent << fragFile.rdbuf();
+	fragFile.close();
+	fString = fContent.str();
+	const char* fs_src = fString.c_str();
+		
 
 	DEBUG_MSG("Setting Up Fragment Shader");
 
@@ -216,13 +277,13 @@ void Game::initialize()
 	}
 
 	DEBUG_MSG("Setting Up and Linking Shader");
-	progID = glCreateProgram();
-	glAttachShader(progID, vsid);
-	glAttachShader(progID, fsid);
-	glLinkProgram(progID);
+	prog = glCreateProgram();
+	glAttachShader(prog, vsid);
+	glAttachShader(prog, fsid);
+	glLinkProgram(prog);
 
 	//Check is Shader Linked
-	glGetProgramiv(progID, GL_LINK_STATUS, &isLinked);
+	glGetProgramiv(prog, GL_LINK_STATUS, &isLinked);
 
 	if (isLinked == 1) {
 		DEBUG_MSG("Shader Linked");
@@ -233,18 +294,19 @@ void Game::initialize()
 	}
 
 	//Use Progam on GPU
-	glUseProgram(progID);
+	glUseProgram(prog);
 
-	img_data = stbi_load(filename.c_str(), &width, &height, &comp_count, 4);
+}
+void Game::loadTexture(GLuint &texture , std::string fileName)
+{
+	img_data = stbi_load(fileName.c_str(), &width, &height, &comp_count, 4);
 
 	if (img_data == NULL)
 	{
 		DEBUG_MSG("ERROR: Texture not loaded");
 	}
 
-	glEnable(GL_TEXTURE_2D);
-	glGenTextures(1, &to);
-	glBindTexture(GL_TEXTURE_2D, to);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	//Wrap around
 	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexParameter.xml
@@ -253,7 +315,7 @@ void Game::initialize()
 
 	//Filtering
 	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glTexParameter.xml
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); 
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	//Bind to OpenGL
@@ -268,49 +330,15 @@ void Game::initialize()
 		GL_RGBA,				//Bitmap
 		GL_UNSIGNED_BYTE,		//Specifies Data type of image data
 		img_data				//Image Data
-		);
-
-	// Find variables in the shader
-	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glGetAttribLocation.xml
-	positionID = glGetAttribLocation(progID, "sv_position");
-	colorID = glGetAttribLocation(progID, "sv_color");
-	uvID = glGetAttribLocation(progID, "sv_uv");
-	textureID = glGetUniformLocation(progID, "f_texture");
-	mvpID = glGetUniformLocation(progID, "sv_mvp");
-
-	// Projection Matrix 
-	projection = perspective(
-		45.0f,					// Field of View 45 degrees
-		4.0f / 3.0f,			// Aspect ratio
-		5.0f,					// Display Range Min : 0.1f unit
-		100.0f					// Display Range Max : 100.0f unit
-		);
-
-	// Camera Matrix
-	view = lookAt(
-		vec3(0.0f, 4.0f, 10.0f),	// Camera (x,y,z), in World Space
-		vec3(0.0f, 0.0f, 0.0f),		// Camera looking at origin
-		vec3(0.0f, 1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
-		);
-
-	// Model matrix
-	model = mat4(
-		1.0f					// Identity Matrix
-		);
-
-	// Enable Depth Test
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-	glEnable(GL_CULL_FACE);
+	);
 }
-
 void Game::update()
 {
 #if (DEBUG >= 2)
 	DEBUG_MSG("Updating...");
 #endif
 	// Update Model View Projection
-	mvp = projection * view * model;
+	//mvp = projection * view * model1;
 }
 
 void Game::render()
@@ -322,6 +350,26 @@ void Game::render()
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+	cubeRender(model1, progID, to);
+	cubeRender(model2, progID2, to2);
+	cubeRender(model3, progID3, to3);
+
+	window.display();
+
+	//Disable Arrays
+	glDisableVertexAttribArray(positionID);
+	glDisableVertexAttribArray(colorID);
+	glDisableVertexAttribArray(uvID);
+	
+}
+void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
+{
+	
+	mvp = projection * view * (model);
+
+	glUseProgram(prog);
+	readIDs(prog);
+
 	//VBO Data....vertices, colors and UV's appended
 	glBufferSubData(GL_ARRAY_BUFFER, 0 * VERTICES * sizeof(GLfloat), 3 * VERTICES * sizeof(GLfloat), vertices);
 	glBufferSubData(GL_ARRAY_BUFFER, 3 * VERTICES * sizeof(GLfloat), 4 * COLORS * sizeof(GLfloat), colors);
@@ -332,14 +380,14 @@ void Game::render()
 
 	//Set Active Texture .... 32
 	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(textureID, 0);
+	glUniform1i(1, 0);
 
 	//Set pointers for each parameter (with appropriate starting positions)
 	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml
 	glVertexAttribPointer(positionID, 3, GL_FLOAT, GL_FALSE, 0, 0);
 	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, (VOID*)(3 * VERTICES * sizeof(GLfloat)));
 	glVertexAttribPointer(uvID, 2, GL_FLOAT, GL_FALSE, 0, (VOID*)(((3 * VERTICES) + (4 * COLORS)) * sizeof(GLfloat)));
-	
+
 	//Enable Arrays
 	glEnableVertexAttribArray(positionID);
 	glEnableVertexAttribArray(colorID);
@@ -347,15 +395,7 @@ void Game::render()
 
 	//Draw Element Arrays
 	glDrawElements(GL_TRIANGLES, 3 * INDICES, GL_UNSIGNED_INT, NULL);
-	window.display();
-
-	//Disable Arrays
-	glDisableVertexAttribArray(positionID);
-	glDisableVertexAttribArray(colorID);
-	glDisableVertexAttribArray(uvID);
-	
 }
-
 void Game::unload()
 {
 #if (DEBUG >= 2)
@@ -366,4 +406,11 @@ void Game::unload()
 	glDeleteBuffers(1, &vib);	//Delete Vertex Index Buffer
 	stbi_image_free(img_data);		//Free image
 }
-
+void Game::readIDs(GLuint &prog)
+{
+	positionID = glGetAttribLocation(prog, "sv_position");
+	colorID = glGetAttribLocation(prog, "sv_color");
+	uvID = glGetAttribLocation(prog, "sv_uv");
+	textureID = glGetUniformLocation(prog, "f_texture");
+	mvpID = glGetUniformLocation(prog, "sv_mvp");
+}

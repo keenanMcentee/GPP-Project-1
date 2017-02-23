@@ -6,8 +6,8 @@
 #include <GL/wglew.h>
 
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
 
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>
@@ -16,6 +16,9 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
+
+#include <sstream>
+#include <fstream>
 
 using namespace std;
 using namespace sf;
@@ -35,6 +38,10 @@ private:
 	void update();
 	void render();
 	void unload();
+	void createProg(GLuint &prog, std::string vertexShaderPath, std::string fragmentShaderPath);
+	void readIDs(GLuint &prog);
+	void loadTexture(GLuint &texture, std::string fileName);
+	void cubeRender(mat4 &model, GLuint &prog, GLuint &texture);
 };
 
 #endif
