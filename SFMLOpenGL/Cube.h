@@ -1,3 +1,13 @@
+/// @Project: Cube Game.
+/// @File: Cube.h
+/// 
+/// @Author: Philip Bourke
+/// 
+/// @Editor: Keenan McEntee
+/// 
+/// @Description: Cube data file.
+/// @Date written: 23rd/february/2017 - 24th/february/2017
+
 #ifndef CUBE_H
 #define CUBE_H
 
@@ -32,6 +42,9 @@ const int INDICES	= 12;	// Total Number of Indexes
 const int UVS		= 48;	// Total Number of UVs
 const int COLORS	= 24;	// Total Number of Colors
 
+/// <summary>
+/// Vertex points of each face on our cube.
+/// </summary>
 static const GLfloat vertices[] =
 {
 	// Front Face
@@ -70,7 +83,9 @@ static const GLfloat vertices[] =
 	 1.00f,  1.00f, -1.00f, // [6]	// (22)
 	 1.00f,  1.00f,  1.00f, // [2]	// (23)
 };
-
+/// <summary>
+/// Colours associated which each vertex in corresponding order.
+/// </summary>
 static const GLfloat colors[] = {
 	
 	// Front Face
@@ -109,7 +124,9 @@ static const GLfloat colors[] = {
 	1.0f, 0.0f, 1.0f, 1.0f, // [6]	// (22)
 	1.0f, 0.0f, 1.0f, 1.0f, // [2]	// (23)
 };
-
+/// <summary>
+/// UV points for mapping a texture on to our cube.
+/// </summary>
 GLfloat uvs[2 * 4 * 6] = {
 	// Front Face (other faces populated in initialisation)
 	0.0, 0.0,
@@ -117,7 +134,9 @@ GLfloat uvs[2 * 4 * 6] = {
 	1.0, 1.0,
 	0.0, 1.0
 };
-
+/// <summary>
+/// Index positions for drawing our verteces.
+/// </summary>
 static const GLuint indices[] =
 {
 	// Front Face
@@ -144,6 +163,9 @@ static const GLuint indices[] =
 	20, 21, 22,
 	22, 23, 20
 };
-
+static GLuint cubeVbo,		// Vertex Buffer ID
+			  cubeVib,		// Vertex Index Buffer
+			  cubeProgID[3];		// Program ID
+static float cubeSpeed = 0.02f;		//Speed at which the cubes move
 #endif
 

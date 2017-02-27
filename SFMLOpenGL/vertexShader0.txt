@@ -12,6 +12,7 @@
 		out vec2 uv;
 		
 		uniform mat4 sv_mvp;
+		uniform float sv_time;
 		
 		void main() {
 			color = sv_color;

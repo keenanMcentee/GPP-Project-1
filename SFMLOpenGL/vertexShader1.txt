@@ -1,0 +1,18 @@
+#version 400
+		
+		//layout(location = 0) in vec3 sv_position; //Use for individual Buffers
+		//layout(location = 1) in vec4 sv_color; //Use for individual Buffers
+		
+		in vec3 sv_position;
+		in vec4 sv_color;
+
+		out vec4 color;
+
+		uniform mat4 sv_mvp;
+		uniform float sv_time;
+		
+		void main() {
+			color = sv_color;
+		//	gl_Position = vec4(sv_position, 1);
+			gl_Position = sv_mvp * vec4(sv_position, 1);
+		}; //Vertex Shader Src

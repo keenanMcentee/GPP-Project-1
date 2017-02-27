@@ -152,10 +152,12 @@ xcopy $(GLEW_SDK)\bin\Release\Win32 $(TargetDir) /C /Y</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Barrier.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="Matrix3.h" />
+    <ClInclude Include="player.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Vector3.h" />
   </ItemGroup>
@@ -184,6 +186,7 @@ xcopy $(GLEW_SDK)\bin\Release\Win32 $(TargetDir) /C /Y</Command>
     <Text Include="fragmentShader2.txt" />
     <Text Include="fragmentShader3.txt" />
     <Text Include="vertexShader0.txt" />
+    <Text Include="vertexShader1.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

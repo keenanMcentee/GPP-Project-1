@@ -1,27 +1,17 @@
 #include <Game.h>
 #include <Cube.h>
+#include <Barrier.h>
+#include <player.h>
+/// @Project: Cube Game.
+/// @File: Game.cpp
+/// 
+/// @Original file by: Philip Bourke
+/// @Edits By: Keenan McEntee
+/// 
+/// @Description: Main Game file which handles running everything in relation to our game.
+/// @Date written: 23rd/february/2017 - 24th/february/2017
 
-GLuint	vsid,		// Vertex Shader ID
-		fsid,		// Fragment Shader ID
-		progID, progID2,progID3,		// Program ID
-		vao = 0,	// Vertex Array ID
-		vbo,		// Vertex Buffer ID
-		vib,		// Vertex Index Buffer
-		to,to2,to3,			// Texture ID 1 to 32
-		positionID,	// Position ID
-		colorID,	// Color ID
-		textureID,	// Texture ID
-		uvID,		// UV ID
-		mvpID;		// Model View Projection ID
 
-//const string filename = ".//Assets//Textures//coordinates.tga";
-//const string filename = ".//Assets//Textures//cube.tga";
-//const string filename = ".//Assets//Textures//grid.tga";
-const string filename = ".//Assets//Textures//grid_wip.tga";
-//const string filename = ".//Assets//Textures//minecraft.tga";
-//const string filename = ".//Assets//Textures//texture.tga";
-//const string filename = ".//Assets//Textures//texture_2.tga";
-//const string filename = ".//Assets//Textures//uvtemplate.tga";
 
 
 int width;			// Width of texture
@@ -30,8 +20,7 @@ int comp_count;		// Component of texture
 
 unsigned char* img_data;		// image data
 
-mat4 mvp, projection, view, model1, model2, model3, model4, model5;			// Model View Projection
-
+mat4 mvp, projection, view;			// Model View Projection
 Game::Game() : 
 	window(VideoMode(800, 600), 
 	"Introduction to OpenGL Texturing")
@@ -39,7 +28,7 @@ Game::Game() :
 }
 
 Game::Game(sf::ContextSettings settings) : 
-	window(VideoMode(800, 600), 
+	window(VideoMode(1376, 768), 
 	"Introduction to OpenGL Texturing", 
 	sf::Style::Default, 
 	settings)
@@ -56,7 +45,7 @@ void Game::run()
 
 	Event event;
 
-	while (isRunning){
+	while (window.isOpen()){
 
 #if (DEBUG >= 2)
 		DEBUG_MSG("Game running...");
@@ -69,32 +58,41 @@ void Game::run()
 				isRunning = false;
 			}
 
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 			{
-				// Set Model Rotation
-				model1 = rotate(model1, 0.05f, glm::vec3(0, 1, 0)); // Rotate
+				if (playerModel[3].x > -8.8) {
+					// Set cubeModel Rotation
+					playerModel = translate(playerModel, vec3(-playerSpeed, 0, 0));
+					viewNormal =  translate(viewNormal, vec3(playerSpeed, 0, 0));
+					viewMoveLeft = translate(viewMoveLeft, vec3(playerSpeed, 0, 0));
+					viewMoveRight = translate(viewMoveRight, vec3(playerSpeed, 0, 0));
+					view = viewMoveLeft;
+				}
 			}
-
 			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 			{
-				// Set Model Rotation
-				model1 = rotate(model1, -0.05f, glm::vec3(0, 1, 0)); // Rotate
+				if (playerModel[3].x < 8.8) {
+					playerModel = translate(playerModel, vec3(playerSpeed, 0, 0));
+					viewNormal = translate(viewNormal, vec3(-playerSpeed, 0, 0));
+					viewMoveLeft = translate(viewMoveLeft, vec3(-playerSpeed, 0, 0));
+					viewMoveRight = translate(viewMoveRight, vec3(-playerSpeed, 0, 0));
+					view = viewMoveRight;
+					
+				}
 			}
-
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+			else
 			{
-				// Set Model Rotation
-				model1 = rotate(model1, -0.05f, glm::vec3(1, 0, 0)); // Rotate
+				// Camera Matrix
+				view = viewNormal;
 			}
-
-			else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 			{
-				// Set Model Rotation
-				model1 = rotate(model1, 0.05f, glm::vec3(1, 0, 0)); // Rotate
+				window.close();
 			}
 		}
 		update();
 		render();
+
 	}
 
 #if (DEBUG >= 2)
@@ -113,52 +111,31 @@ void Game::initialize()
 	//Copy UV's to all faces
 	for (int i = 1; i < 6; i++)
 		memcpy(&uvs[i * 4 * 2], &uvs[0], 2 * 4 * sizeof(GLfloat));
-
-
-	glm::vec2 translations[100];
-	int index = 0;
-	GLfloat offset = 0.1f;
-	for (GLint y = -10; y < 10; y += 2)
-	{
-		for (GLint x = -10; x < 10; x += 2)
-		{
-			glm::vec2 translation;
-			translation.x = (GLfloat)x / 10.0f + offset;
-			translation.y = (GLfloat)y / 10.0f + offset;
-			translations[index++] = translation;
-		}
-	}
 	
 
 	DEBUG_MSG(glGetString(GL_VENDOR));
 	DEBUG_MSG(glGetString(GL_RENDERER));
 	DEBUG_MSG(glGetString(GL_VERSION));
 
-	glGenVertexArrays(1, &vao); //Gen Vertex Array
-	glBindVertexArray(vao);
+	glGenVertexArrays(1, &cubeVao); //Gen Vertex Array
+	glBindVertexArray(cubeVao);
 
-	glGenBuffers(1, &vbo);		//Gen Vertex Buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glGenBuffers(1, &cubeVbo);		//Gen Vertex Buffer
+	glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
 
 	//Vertices (3) x,y,z , Colors (4) RGBA, UV/ST (2)
 	glBufferData(GL_ARRAY_BUFFER, ((3 * VERTICES) + (4 * COLORS) + (2 * UVS)) * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
 
-	glGenBuffers(1, &vib); //Gen Vertex Index Buffer
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vib);
+	glGenBuffers(1, &cubeVib); //Gen Vertex Index Buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVib);
 
 	//Indices to be drawn
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * INDICES * sizeof(GLuint), indices, GL_STATIC_DRAW);
 
 	
-	createProg(progID, "vertexShader0.txt", "fragmentShader1.txt");
-
-	
-	createProg(progID2, "vertexShader0.txt", "fragmentShader2.txt");
-
-	
-	createProg(progID3, "vertexShader0.txt", "fragmentShader3.txt");
-	
-	
+	createProg(cubeProgID[0], "vertexShader0.txt", "fragmentShader1.txt");
+	createProg(cubeProgID[1], "vertexShader0.txt", "fragmentShader2.txt");
+	createProg(cubeProgID[2], "vertexShader0.txt", "fragmentShader3.txt");
 
 	glEnable(GL_TEXTURE_2D);
 	glGenTextures(3, &to);
@@ -166,12 +143,44 @@ void Game::initialize()
 	loadTexture(to, ".//Assets//Textures//texture.tga");
 	loadTexture(to, ".//Assets//Textures//texture_2.tga");
 
+	glGenVertexArrays(1, &barrierVao); //Gen Vertex Array
+	glBindVertexArray(barrierVao);
+
+	glGenBuffers(1, &barrierVbo);		//Gen Vertex Buffer
+	glBindBuffer(GL_ARRAY_BUFFER, barrierVbo);
+
+	//Vertices (3) x,y,z , Colors (4) RGBA, time
+	glBufferData(GL_ARRAY_BUFFER, ((3 * BARRIER_VERTICES) + (4 * BARRIER_COLORS) + 1) * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &barrierVib); //Gen Vertex Index Buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, barrierVib);
+
+	//Indices to be drawn
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * BARRIER_INDICES * sizeof(GLuint), BARRIER_indices, GL_STATIC_DRAW);
+	createProg(barrierProgID, "vertexShader1.txt", "fragmentShader1.txt");
+
+	glGenVertexArrays(1, &playerVao); //Gen Vertex Array
+	glBindVertexArray(playerVao);
+
+	glGenBuffers(1, &playerVbo);		//Gen Vertex Buffer
+	glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
+
+	//Vertices (3) x,y,z , Colors (4) RGBA, time
+	glBufferData(GL_ARRAY_BUFFER, ((3 * player_VERTICES) + (4 * player_COLORS) + 1) * sizeof(GLfloat), NULL, GL_STATIC_DRAW);
+
+	glGenBuffers(1, &playerVib); //Gen Vertex Index Buffer
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, playerVib);
+
+	//Indices to be drawn
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * player_INDICES * sizeof(GLuint), player_indices, GL_STATIC_DRAW);
+	createProg(playerProgID, "vertexShader0.txt", "fragmentShader1.txt");
+
 	// Projection Matrix 
 	projection = perspective(
 		45.0f,					// Field of View 45 degrees
 		4.0f / 3.0f,			// Aspect ratio
-		5.0f,					// Display Range Min : 0.1f unit
-		100.0f					// Display Range Max : 100.0f unit
+		0.1f,					// Display Range Min : 0.1f unit
+		500.0f					// Display Range Max : 100.0f unit
 		);
 
 	// Camera Matrix
@@ -180,38 +189,34 @@ void Game::initialize()
 		vec3(0.0f, 0.0f, 0.0f),		// Camera looking at origin
 		vec3(0.0f, 1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
 		);
+	for (size_t i = 0; i < 5; i++)
+	{
+		// cubeModel matrix
+		cubeModel[i] = mat4(1.0f);// Identity Matrix
+		
 
-	// Model matrix
-	model1 = mat4(
-		1.0f					// Identity Matrix
-		);
+	}
+	barrierModel[0] = mat4(1.0f);
+	barrierModel[1] = mat4(1.0f);
 
-	// Model matrix
-	model2 = mat4(
-		1.0f					// Identity Matrix
-	);
+	cubeModel[0] = translate(cubeModel[0], vec3(-2, 0, -100));
+	cubeModel[1] = translate(cubeModel[1], vec3(4, 0, 0));
+	cubeModel[4] = translate(cubeModel[4], vec3(-6, 0, 0));
+	cubeModel[3] = translate(cubeModel[3], vec3(8, 0, -30));
+	cubeModel[2] = translate(cubeModel[2], vec3(-8, 0, -30));
 
-	// Model matrix
-	model3 = mat4(
-		1.0f					// Identity Matrix
-	);
+	barrierModel[0] = translate(barrierModel[0], vec3(-10, 0, 0));
+	barrierModel[1] = translate(barrierModel[1], vec3(10, 0, 0));
 
-	// Model matrix
-	model4 = mat4(
-		1.0f					// Identity Matrix
-	);
-
-	// Model matrix
-	model5 = mat4(
-		1.0f					// Identity Matrix
-	);
-
-	model2 = translate(model2, vec3(5, 0, 0));
-	model3 = translate(model3, vec3(-5, 0, 0));
+	playerModel = rotate(playerModel, 0.2f, vec3(1,0, 0));
 	// Enable Depth Test
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
 	glEnable(GL_CULL_FACE);
+
+	viewNormal = view;
+	viewMoveLeft = rotate(view, 0.2f, vec3(0, 0, 1));
+	viewMoveRight = rotate(view, -0.2f, vec3(0, 0, 1));
 }
 void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fragmentShaderPath)
 {
@@ -337,8 +342,33 @@ void Game::update()
 #if (DEBUG >= 2)
 	DEBUG_MSG("Updating...");
 #endif
-	// Update Model View Projection
-	//mvp = projection * view * model1;
+	for (size_t i = 0 ; i < 5; i++)
+	{
+		if (i != 0)
+		cubeModel[i] = translate(cubeModel[i], vec3(0, 0, cubeSpeed + i/4.0f));
+		else
+			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, cubeSpeed + 0.2/ 0.5f));
+		if (cubeModel[i][3].z > 12)
+		{
+			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, -500));
+		}
+	}
+
+	if (count > 300)
+	{
+		cubeSpeed += 0.001f;
+		count = 0;
+	}
+	count++;
+
+	if ((int)count % 100 == 0)
+	{
+		playerModel = translate(playerModel, vec3(0, 0.6, 0));
+	}
+	else if ((int)count % 50 == 0)
+	{
+		playerModel = translate(playerModel, vec3(0, -0.6, 0));
+	}
 }
 
 void Game::render()
@@ -347,27 +377,45 @@ void Game::render()
 #if (DEBUG >= 2)
 	DEBUG_MSG("Render Loop...");
 #endif
-
+	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glBindBuffer(GL_ARRAY_BUFFER, cubeVao);
+	glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVib);
+	for (size_t i = 0; i < 5; i++)
+	{
+		if (i < 3)
+			cubeRender(cubeModel[i], cubeProgID[1], to);
+		else
+			cubeRender(cubeModel[i], cubeProgID[2], to);
+	}
+	
+	glBindBuffer(GL_ARRAY_BUFFER, barrierVao);
+	glBindBuffer(GL_ARRAY_BUFFER, barrierVbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, barrierVib);
+	barrierRender(barrierModel[0], barrierProgID);
+	barrierRender(barrierModel[1], barrierProgID);
 
-	cubeRender(model1, progID, to);
-	cubeRender(model2, progID2, to2);
-	cubeRender(model3, progID3, to3);
+	glBindBuffer(GL_ARRAY_BUFFER, playerVao);
+	glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, playerVib);
+	playerRender(playerModel, playerProgID);
 
 	window.display();
+
 
 	//Disable Arrays
 	glDisableVertexAttribArray(positionID);
 	glDisableVertexAttribArray(colorID);
 	glDisableVertexAttribArray(uvID);
-	
+	count++;
 }
 void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
 {
 	
 	mvp = projection * view * (model);
-
 	glUseProgram(prog);
+
 	readIDs(prog);
 
 	//VBO Data....vertices, colors and UV's appended
@@ -396,14 +444,69 @@ void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
 	//Draw Element Arrays
 	glDrawElements(GL_TRIANGLES, 3 * INDICES, GL_UNSIGNED_INT, NULL);
 }
+void Game::barrierRender(mat4 &model, GLuint &prog)
+{
+
+	mvp = projection * view * (model);
+	
+	glUseProgram(prog);
+	readIDs(prog);
+
+	//VBO Data....vertices, colors and UV's appended
+	glBufferSubData(GL_ARRAY_BUFFER, 0 * BARRIER_VERTICES * sizeof(GLfloat), 3 * BARRIER_VERTICES * sizeof(GLfloat), BARRIER_vertices);
+	glBufferSubData(GL_ARRAY_BUFFER, 3 * BARRIER_VERTICES * sizeof(GLfloat), 4 * BARRIER_COLORS * sizeof(GLfloat), BARRIER_colors);
+	// Send transformation to shader mvp uniform
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
+
+	//Set pointers for each parameter (with appropriate starting positions)
+	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml
+	glVertexAttribPointer(positionID, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, (VOID*)(3 * BARRIER_VERTICES * sizeof(GLfloat)));
+
+	//Enable Arrays
+	glEnableVertexAttribArray(positionID);
+	glEnableVertexAttribArray(colorID);
+
+	//Draw Element Arrays
+	glDrawElements(GL_TRIANGLES, 50, GL_UNSIGNED_INT, NULL);
+}
+void Game::playerRender(mat4 &model, GLuint &prog)
+{
+
+	mvp = projection * view * (model);
+
+	glUseProgram(prog);
+	readIDs(prog);
+
+	//VBO Data....vertices, colors and UV's appended
+	glBufferSubData(GL_ARRAY_BUFFER, 0 * player_VERTICES * sizeof(GLfloat), 3 * player_VERTICES * sizeof(GLfloat), player_vertices);
+	glBufferSubData(GL_ARRAY_BUFFER, 3 * player_VERTICES * sizeof(GLfloat), 4 * player_COLORS * sizeof(GLfloat), player_colors);
+	// Send transformation to shader mvp uniform
+	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
+
+	//Set pointers for each parameter (with appropriate starting positions)
+	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml
+	glVertexAttribPointer(positionID, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(colorID, 4, GL_FLOAT, GL_FALSE, 0, (VOID*)(3 * player_VERTICES * sizeof(GLfloat)));
+
+	//Enable Arrays
+	glEnableVertexAttribArray(positionID);
+	glEnableVertexAttribArray(colorID);
+
+	//Draw Element Arrays
+	glDrawElements(GL_TRIANGLES, 50, GL_UNSIGNED_INT, NULL);
+}
 void Game::unload()
 {
 #if (DEBUG >= 2)
 	DEBUG_MSG("Cleaning up...");
 #endif
-	glDeleteProgram(progID);	//Delete Shader
-	glDeleteBuffers(1, &vbo);	//Delete Vertex Buffer
-	glDeleteBuffers(1, &vib);	//Delete Vertex Index Buffer
+	for (size_t i = 0; i < 3; i++)
+	{
+		glDeleteProgram(cubeProgID[i]);	//Delete Shader
+	}
+	glDeleteBuffers(1, &cubeVbo);	//Delete Vertex Buffer
+	glDeleteBuffers(1, &cubeVib);	//Delete Vertex Index Buffer
 	stbi_image_free(img_data);		//Free image
 }
 void Game::readIDs(GLuint &prog)
