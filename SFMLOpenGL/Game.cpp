@@ -217,6 +217,13 @@ void Game::initialize()
 	viewNormal = view;
 	viewMoveLeft = rotate(view, 0.2f, vec3(0, 0, 1));
 	viewMoveRight = rotate(view, -0.2f, vec3(0, 0, 1));
+
+	font.loadFromFile("arial.ttf");
+	testText.setFont(font);
+
+	testText.setPosition(sf::Vector2f(100, 100));
+	testText.setColor(sf::Color::White);
+	testText.setString("TEST TEXT");
 }
 void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fragmentShaderPath)
 {
@@ -379,6 +386,11 @@ void Game::render()
 #endif
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	window.pushGLStates();
+
+	window.draw(testText);
+
+	window.popGLStates();
 	glBindBuffer(GL_ARRAY_BUFFER, cubeVao);
 	glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVib);
@@ -409,6 +421,9 @@ void Game::render()
 	glDisableVertexAttribArray(colorID);
 	glDisableVertexAttribArray(uvID);
 	count++;
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 }
 void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
 {

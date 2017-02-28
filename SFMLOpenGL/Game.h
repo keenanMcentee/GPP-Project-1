@@ -24,7 +24,7 @@
 //TEXT LOADER HEADERS
 #include <sstream>
 #include <fstream>
-
+#include <SFML\Graphics.hpp>
 using namespace std;
 using namespace sf;
 using namespace glm;
@@ -38,7 +38,7 @@ public:
 	void run();
 private:
 	int NUM_OF_CUBES = 5;
-	Window window;
+	sf::RenderWindow window;
 	bool isRunning = false;
 	void initialize();
 	void update();
@@ -75,6 +75,8 @@ private:
 	//const string filename = ".//Assets//Textures//texture.tga";
 	//const string filename = ".//Assets//Textures//texture_2.tga";
 	//const string filename = ".//Assets//Textures//uvtemplate.tga";
+	sf::Font font;
+	sf::Text testText;
 };
 
 #endif
