@@ -27,6 +27,7 @@
 #include <fstream>
 //UI ELEMENTS
 #include "Label.h"
+#include <SFML\Graphics.hpp>
 using namespace std;
 using namespace sf;
 using namespace glm;

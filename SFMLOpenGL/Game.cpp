@@ -433,15 +433,9 @@ void Game::render(sf::Time time)
 	glDisableVertexAttribArray(colorID);
 	glDisableVertexAttribArray(uvID);
 	count++;
-
-
-	// Unbind Buffers with 0 (Resets OpenGL States...important step)
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	// Reset the Shader Program to Use
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
 }
 void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
 {
