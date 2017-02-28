@@ -18,24 +18,25 @@ int width;			// Width of texture
 int height;			// Height of texture
 int comp_count;		// Component of texture
 
+
 unsigned char* img_data;		// image data
 
 mat4 mvp, projection, view;			// Model View Projection
-Game::Game() : 
-	window(VideoMode(800, 600), 
-	"Introduction to OpenGL Texturing")
+Game::Game() :
+	window(VideoMode(800, 600),
+		"Introduction to OpenGL Texturing")
 {
 }
 
-Game::Game(sf::ContextSettings settings) : 
-	window(VideoMode(1376, 768), 
-	"Introduction to OpenGL Texturing", 
-	sf::Style::Default, 
-	settings)
+Game::Game(sf::ContextSettings settings) :
+	window(VideoMode(1376, 768),
+		"Introduction to OpenGL Texturing",
+		sf::Style::Default,
+		settings)
 {
 }
 
-Game::~Game(){}
+Game::~Game() {}
 
 
 void Game::run()
@@ -45,7 +46,7 @@ void Game::run()
 
 	Event event;
 
-	while (window.isOpen()){
+	while (window.isOpen()) {
 
 #if (DEBUG >= 2)
 		DEBUG_MSG("Game running...");
@@ -63,7 +64,7 @@ void Game::run()
 				if (playerModel[3].x > -8.8) {
 					// Set cubeModel Rotation
 					playerModel = translate(playerModel, vec3(-playerSpeed, 0, 0));
-					viewNormal =  translate(viewNormal, vec3(playerSpeed, 0, 0));
+					viewNormal = translate(viewNormal, vec3(playerSpeed, 0, 0));
 					viewMoveLeft = translate(viewMoveLeft, vec3(playerSpeed, 0, 0));
 					viewMoveRight = translate(viewMoveRight, vec3(playerSpeed, 0, 0));
 					view = viewMoveLeft;
@@ -77,7 +78,7 @@ void Game::run()
 					viewMoveLeft = translate(viewMoveLeft, vec3(-playerSpeed, 0, 0));
 					viewMoveRight = translate(viewMoveRight, vec3(-playerSpeed, 0, 0));
 					view = viewMoveRight;
-					
+
 				}
 			}
 			else
@@ -90,8 +91,8 @@ void Game::run()
 				window.close();
 			}
 		}
-		update();
-		render();
+		update(timeSinceLastUpdate);
+		render(timeSinceLastUpdate);
 
 	}
 
@@ -111,7 +112,7 @@ void Game::initialize()
 	//Copy UV's to all faces
 	for (int i = 1; i < 6; i++)
 		memcpy(&uvs[i * 4 * 2], &uvs[0], 2 * 4 * sizeof(GLfloat));
-	
+
 
 	DEBUG_MSG(glGetString(GL_VENDOR));
 	DEBUG_MSG(glGetString(GL_RENDERER));
@@ -138,10 +139,10 @@ void Game::initialize()
 	createProg(cubeProgID[2], "vertexShader0.txt", "fragmentShader3.txt");
 
 	glEnable(GL_TEXTURE_2D);
-	glGenTextures(3, &to);
-	loadTexture(to, ".//Assets//Textures//grid_wip.tga");
-	loadTexture(to, ".//Assets//Textures//texture.tga");
-	loadTexture(to, ".//Assets//Textures//texture_2.tga");
+	glGenTextures(3, &to[0]);
+	loadTexture(to[0], ".//Assets//Textures//texture_2.tga");
+	loadTexture(to[0], ".//Assets//Textures//texture_2.tga");
+	loadTexture(to[0], ".//Assets//Textures//texture_2.tga");
 
 	glGenVertexArrays(1, &barrierVao); //Gen Vertex Array
 	glBindVertexArray(barrierVao);
@@ -181,19 +182,19 @@ void Game::initialize()
 		4.0f / 3.0f,			// Aspect ratio
 		0.1f,					// Display Range Min : 0.1f unit
 		500.0f					// Display Range Max : 100.0f unit
-		);
+	);
 
 	// Camera Matrix
 	view = lookAt(
 		vec3(0.0f, 4.0f, 10.0f),	// Camera (x,y,z), in World Space
 		vec3(0.0f, 0.0f, 0.0f),		// Camera looking at origin
 		vec3(0.0f, 1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
-		);
-	for (size_t i = 0; i < 5; i++)
+	);
+	for (int i = 0; i < NUM_OF_CUBES; i++)
 	{
 		// cubeModel matrix
 		cubeModel[i] = mat4(1.0f);// Identity Matrix
-		
+
 
 	}
 	barrierModel[0] = mat4(1.0f);
@@ -208,7 +209,7 @@ void Game::initialize()
 	barrierModel[0] = translate(barrierModel[0], vec3(-10, 0, 0));
 	barrierModel[1] = translate(barrierModel[1], vec3(10, 0, 0));
 
-	playerModel = rotate(playerModel, 0.2f, vec3(1,0, 0));
+	playerModel = rotate(playerModel, 0.2f, vec3(1, 0, 0));
 	// Enable Depth Test
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -217,6 +218,11 @@ void Game::initialize()
 	viewNormal = view;
 	viewMoveLeft = rotate(view, 0.2f, vec3(0, 0, 1));
 	viewMoveRight = rotate(view, -0.2f, vec3(0, 0, 1));
+	triangleRect.setSize(sf::Vector2f(1, 1));
+	cubeRect.setSize(sf::Vector2f(2, 2));
+	m_ftArial.loadFromFile("./Assets/Fonts/BBrick.ttf");
+	m_lblScore.intialise("Score: ", sf::Vector2f(100, 100), &m_ftArial);
+	score = 0;
 }
 void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fragmentShaderPath)
 {
@@ -224,7 +230,7 @@ void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fr
 	GLint isLinked = 0;
 
 
-	
+
 	ifstream vertexFile;
 	std::string vString;
 	std::stringstream vContent;
@@ -233,7 +239,7 @@ void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fr
 	vertexFile.close();
 	vString = vContent.str();
 	const char* vs_src = vString.c_str();
-		
+
 
 	DEBUG_MSG("Setting Up Vertex Shader");
 
@@ -261,7 +267,7 @@ void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fr
 	fragFile.close();
 	fString = fContent.str();
 	const char* fs_src = fString.c_str();
-		
+
 
 	DEBUG_MSG("Setting Up Fragment Shader");
 
@@ -302,7 +308,7 @@ void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fr
 	glUseProgram(prog);
 
 }
-void Game::loadTexture(GLuint &texture , std::string fileName)
+void Game::loadTexture(GLuint &texture, std::string fileName)
 {
 	img_data = stbi_load(fileName.c_str(), &width, &height, &comp_count, 4);
 
@@ -337,17 +343,31 @@ void Game::loadTexture(GLuint &texture , std::string fileName)
 		img_data				//Image Data
 	);
 }
-void Game::update()
+void Game::update(sf::Time timeSinceLast)
 {
+	m_lblScore.setText("Score: " + std::to_string(score));
+	triangleRect.setPosition(playerModel[3].x, playerModel[3].z);
 #if (DEBUG >= 2)
 	DEBUG_MSG("Updating...");
 #endif
-	for (size_t i = 0 ; i < 5; i++)
+	for (size_t i = 0; i < 6; i++)
+	{
+		cubeRect.setPosition(cubeModel[i][3].x, cubeModel[i][3].z);
+		if (cubeRect.getGlobalBounds().intersects(triangleRect.getGlobalBounds()))
+		{
+			std::cout << "HIT" << std::endl;
+		}
+		else
+		{
+			//std::cout << ""<<std::endl;
+		}
+	}
+	for (size_t i = 0; i < 6; i++)
 	{
 		if (i != 0)
-		cubeModel[i] = translate(cubeModel[i], vec3(0, 0, cubeSpeed + i/4.0f));
+			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, cubeSpeed + i / 4.0f));
 		else
-			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, cubeSpeed + 0.2/ 0.5f));
+			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, cubeSpeed + 0.2 / 0.5f));
 		if (cubeModel[i][3].z > 12)
 		{
 			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, -500));
@@ -359,37 +379,41 @@ void Game::update()
 		cubeSpeed += 0.001f;
 		count = 0;
 	}
+	if (cubeSpeed > playerSpeed)
+	{
+		playerSpeed = cubeSpeed + 0.02f;
+	}
 	count++;
-
-	if ((int)count % 100 == 0)
-	{
-		playerModel = translate(playerModel, vec3(0, 0.6, 0));
-	}
-	else if ((int)count % 50 == 0)
-	{
-		playerModel = translate(playerModel, vec3(0, -0.6, 0));
-	}
 }
+void Game::moveCubes()
+{
 
-void Game::render()
+}
+void Game::render(sf::Time time)
 {
 
 #if (DEBUG >= 2)
 	DEBUG_MSG("Render Loop...");
 #endif
-	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	// Save current OpenGL render states
+	// https://www.sfml-dev.org/documentation/2.0/classsf_1_1RenderTarget.php#a8d1998464ccc54e789aaf990242b47f7
+	window.pushGLStates();
+
+	m_lblScore.draw(&window);
+
+	window.popGLStates();
 	glBindBuffer(GL_ARRAY_BUFFER, cubeVao);
 	glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVib);
-	for (size_t i = 0; i < 5; i++)
+	for (size_t i = 0; i < 6; i++)
 	{
 		if (i < 3)
-			cubeRender(cubeModel[i], cubeProgID[1], to);
+			cubeRender(cubeModel[i], cubeProgID[1], to[0]);
 		else
-			cubeRender(cubeModel[i], cubeProgID[2], to);
+			cubeRender(cubeModel[i], cubeProgID[2], to[0]);
 	}
-	
+
 	glBindBuffer(GL_ARRAY_BUFFER, barrierVao);
 	glBindBuffer(GL_ARRAY_BUFFER, barrierVbo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, barrierVib);
@@ -409,10 +433,19 @@ void Game::render()
 	glDisableVertexAttribArray(colorID);
 	glDisableVertexAttribArray(uvID);
 	count++;
+
+
+	// Unbind Buffers with 0 (Resets OpenGL States...important step)
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	// Reset the Shader Program to Use
+	glBindVertexArray(0);
+
 }
 void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
 {
-	
+
 	mvp = projection * view * (model);
 	glUseProgram(prog);
 
@@ -442,13 +475,13 @@ void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
 	glEnableVertexAttribArray(uvID);
 
 	//Draw Element Arrays
-	glDrawElements(GL_TRIANGLES, 3 * INDICES, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_TRIANGLES, 50, GL_UNSIGNED_INT, NULL);
 }
 void Game::barrierRender(mat4 &model, GLuint &prog)
 {
 
 	mvp = projection * view * (model);
-	
+
 	glUseProgram(prog);
 	readIDs(prog);
 
@@ -483,7 +516,7 @@ void Game::playerRender(mat4 &model, GLuint &prog)
 	glBufferSubData(GL_ARRAY_BUFFER, 3 * player_VERTICES * sizeof(GLfloat), 4 * player_COLORS * sizeof(GLfloat), player_colors);
 	// Send transformation to shader mvp uniform
 	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
-
+	glUniform1f(timeID, 0.05f);
 	//Set pointers for each parameter (with appropriate starting positions)
 	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml
 	glVertexAttribPointer(positionID, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -516,4 +549,5 @@ void Game::readIDs(GLuint &prog)
 	uvID = glGetAttribLocation(prog, "sv_uv");
 	textureID = glGetUniformLocation(prog, "f_texture");
 	mvpID = glGetUniformLocation(prog, "sv_mvp");
+	timeID = glGetUniformLocation(prog, "time");
 }

@@ -2,7 +2,6 @@
 		
 		in vec4 color;
 		in vec2 uv;
-		in float time;
 		
 		uniform sampler2D f_texture;
 		uniform sampler2D f_texture2;
@@ -16,7 +15,7 @@
 		//	fColor = texture2D(f_texture2, uv);
 		//	fColor = color * texture2D(f_texture, uv);
 		//	fColor = lightColor * texture2D(f_texture, uv);
-			fColor = color + texture2D(f_texture, uv);
+			fColor = vec4(0.0,0.50,0.0,0.7) + texture2D(f_texture, uv);
 		//	fColor = color - texture2D(f_texture, uv);
 		//	fColor = color;
 		}; //Fragment Shader Src

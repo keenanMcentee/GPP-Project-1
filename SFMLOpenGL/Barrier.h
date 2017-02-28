@@ -10,7 +10,7 @@
 #define BARRIER_H
 
 #include <gl/glew.h>
-
+#include <gtc/matrix_transform.hpp>
 const int BARRIER_VERTICES = 8;	// Total Number of Vertices
 const int BARRIER_INDICES = 4;	// Total Number of Indexes
 const int BARRIER_COLORS = 8;	// Total Number of Colors
@@ -23,11 +23,11 @@ static const GLfloat BARRIER_vertices[] =
 	0.00f,  1.00f,  15.00f, // [3]	// (18)
 	0.00f,  1.00f, -500.00f, // [7]	// (19)
 
-	// Right Face
-	 0.00f, -1.00f,  15.00f, // [1]	// (20)
-	 0.00f, -1.00f, -500.00f, // [5]	// (21)
-	 0.00f,  1.00f, -500.00f, // [6]	// (22)
-	 0.00f,  1.00f,  15.00f, // [2]	// (23)
+							 // Right Face
+							 0.00f, -1.00f,  15.00f, // [1]	// (20)
+							 0.00f, -1.00f, -500.00f, // [5]	// (21)
+							 0.00f,  1.00f, -500.00f, // [6]	// (22)
+							 0.00f,  1.00f,  15.00f, // [2]	// (23)
 };
 
 static const GLfloat BARRIER_colors[] = {
@@ -57,5 +57,5 @@ static GLuint barrierProgID, //Shader ID.
 barrierVbo,	 //Barrier Vertex Buffer.
 barrierVib,	 //Barrier Vertex Index.
 barrierVao;
-mat4 barrierModel[2];		//Models for the barriers.
+glm::mat4 barrierModel[2];		//Models for the barriers.
 #endif

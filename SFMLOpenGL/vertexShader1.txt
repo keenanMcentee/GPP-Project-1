@@ -1,8 +1,5 @@
 #version 400
-		
-		//layout(location = 0) in vec3 sv_position; //Use for individual Buffers
-		//layout(location = 1) in vec4 sv_color; //Use for individual Buffers
-		
+
 		in vec3 sv_position;
 		in vec4 sv_color;
 

@@ -153,18 +153,32 @@ xcopy $(GLEW_SDK)\bin\Release\Win32 $(TargetDir) /C /Y</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Barrier.h" />
+    <ClInclude Include="Buttons.h" />
+    <ClInclude Include="Checkbox.h" />
     <ClInclude Include="Cube.h" />
     <ClInclude Include="Debug.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="Label.h" />
     <ClInclude Include="Matrix3.h" />
-    <ClInclude Include="player.h" />
+    <ClInclude Include="Player.h" />
+    <ClInclude Include="ScreenManager.h" />
+    <ClInclude Include="Screens.h" />
+    <ClInclude Include="Slider.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="Vector3.h" />
+    <ClInclude Include="Widget.h" />
+    <ClInclude Include="Xbox360Controller.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Buttons.cpp" />
+    <ClCompile Include="Checkbox.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Label.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Slider.cpp" />
     <ClCompile Include="stb_image.c" />
+    <ClCompile Include="Widget.cpp" />
+    <ClCompile Include="Xbox360Controller.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
@@ -182,6 +196,10 @@ xcopy $(GLEW_SDK)\bin\Release\Win32 $(TargetDir) /C /Y</Command>
     <Image Include="Assets\Textures\uvtemplate.tga" />
   </ItemGroup>
   <ItemGroup>
+    <Font Include="Assets\Fonts\BBrick.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="BarrierFragShader.txt" />
     <Text Include="fragmentShader1.txt" />
     <Text Include="fragmentShader2.txt" />
     <Text Include="fragmentShader3.txt" />
