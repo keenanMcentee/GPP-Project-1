@@ -17,6 +17,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/OpenGL.hpp>
+#include <SFML/Audio.hpp>
 //DEBUG HEADER TO PRINT TO CONSOLE
 #include <Debug.h>
 //IMAGE LOADER HEADER
@@ -27,7 +28,10 @@
 #include <fstream>
 //UI ELEMENTS
 #include "Label.h"
+#include "Buttons.h"
+#include "Xbox360Controller.h"
 #include <SFML\Graphics.hpp>
+#include "ScreenManager.h"
 using namespace std;
 using namespace sf;
 using namespace glm;
@@ -60,6 +64,7 @@ private:
 	float count = 0;
 	float pushBack = -500;
 	mat4 viewMoveLeft, viewMoveRight, viewNormal;
+	mat4 playerMoveLeft, playerMoveRight, playerNormal;
 	sf::RectangleShape triangleRect, cubeRect;
 
 	GLuint	vsid,		// Vertex Shader ID
@@ -94,7 +99,26 @@ private:
 	const sf::Time timePerFrame = sf::seconds(1.0f / 60.0f);
 	sf::Time timeSinceLastUpdate;
 	sf::RectangleShape a;
-	
+	sf::Music m_bgMusic;
+	GameState currentScreen;
+	Label loseTxt, m_endScreenScore, m_lblSplashScreen;
+	Buttons restartBtn;
+	xbox360Controller gamePad;
+	void renderSFML();
+	void renderOGL();
+	void startGame();
+	void gamePadControl();
+
+	int alpha;
+	sf::Time m_cumlativeTime;
+	/*---------------LICENSE ELEMENTS--------------------------*/
+	sf::Sprite licenseSprite;
+	sf::Texture texture;
+	/*---------------------------------------------------------*/
+	/*----------------------SPLASH ELEMENTS--------------------*/
+	sf::Sprite splashSprite;
+	sf::Texture splashTexture;
+	/*---------------------------------------------------------*/
 };
 
 #endif

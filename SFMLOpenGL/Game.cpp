@@ -32,7 +32,8 @@ Game::Game(sf::ContextSettings settings) :
 	window(VideoMode(1376, 768),
 		"Introduction to OpenGL Texturing",
 		sf::Style::Default,
-		settings)
+		settings),
+	currentScreen(GameState::License)
 {
 }
 
@@ -64,9 +65,14 @@ void Game::run()
 				if (playerModel[3].x > -8.8) {
 					// Set cubeModel Rotation
 					playerModel = translate(playerModel, vec3(-playerSpeed, 0, 0));
-					viewNormal = translate(viewNormal, vec3(playerSpeed, 0, 0));
-					viewMoveLeft = translate(viewMoveLeft, vec3(playerSpeed, 0, 0));
-					viewMoveRight = translate(viewMoveRight, vec3(playerSpeed, 0, 0));
+					playerMoveLeft = translate(playerModel, vec3(-playerSpeed, 0, 0));
+					playerMoveRight = translate(playerModel, vec3(-playerSpeed, 0, 0));
+					playerNormal = translate(playerModel, vec3(-playerSpeed, 0, 0));
+					playerModel = playerMoveLeft;
+
+					viewNormal = translate(viewNormal, vec3(playerSpeed / 2, 0, 0));
+					viewMoveLeft = translate(viewMoveLeft, vec3(playerSpeed / 2, 0, 0));
+					viewMoveRight = translate(viewMoveRight, vec3(playerSpeed / 2, 0, 0));
 					view = viewMoveLeft;
 				}
 			}
@@ -74,9 +80,14 @@ void Game::run()
 			{
 				if (playerModel[3].x < 8.8) {
 					playerModel = translate(playerModel, vec3(playerSpeed, 0, 0));
-					viewNormal = translate(viewNormal, vec3(-playerSpeed, 0, 0));
-					viewMoveLeft = translate(viewMoveLeft, vec3(-playerSpeed, 0, 0));
-					viewMoveRight = translate(viewMoveRight, vec3(-playerSpeed, 0, 0));
+					playerMoveLeft = translate(playerModel, vec3(playerSpeed, 0, 0));
+					playerMoveRight = translate(playerModel, vec3(playerSpeed, 0, 0));
+					playerNormal = translate(playerModel, vec3(playerSpeed, 0, 0));
+					playerModel = playerMoveRight;
+
+					viewNormal = translate(viewNormal, vec3(-playerSpeed / 2, 0, 0));
+					viewMoveLeft = translate(viewMoveLeft, vec3(-playerSpeed / 2, 0, 0));
+					viewMoveRight = translate(viewMoveRight, vec3(-playerSpeed / 2, 0, 0));
 					view = viewMoveRight;
 
 				}
@@ -84,6 +95,7 @@ void Game::run()
 			else
 			{
 				// Camera Matrix
+				playerModel = playerNormal;
 				view = viewNormal;
 			}
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
@@ -91,7 +103,15 @@ void Game::run()
 				window.close();
 			}
 		}
-		update(timeSinceLastUpdate);
+		//get the time since last update and restart the clock
+		timeSinceLastUpdate += clock.restart();
+		//update every 60th of a second
+		if (timeSinceLastUpdate > timePerFrame)
+		{
+			timeSinceLastUpdate -= timePerFrame;
+			update(timeSinceLastUpdate);
+
+		}
 		render(timeSinceLastUpdate);
 
 	}
@@ -221,8 +241,41 @@ void Game::initialize()
 	triangleRect.setSize(sf::Vector2f(1, 1));
 	cubeRect.setSize(sf::Vector2f(2, 2));
 	m_ftArial.loadFromFile("./Assets/Fonts/BBrick.ttf");
-	m_lblScore.intialise("Score: ", sf::Vector2f(100, 100), &m_ftArial);
+	m_lblScore.intialise("Score: ", sf::Vector2f(400, 100), &m_ftArial);
 	score = 0;
+
+	startGame();
+
+	loseTxt.intialise("Game Over", sf::Vector2f(300, 200), &m_ftArial, sf::Color::Yellow, 0, 128);
+	m_endScreenScore.intialise("Score: ", sf::Vector2f(360, 400), &m_ftArial);
+	restartBtn.initialise(sf::Vector2f(600, 500), 250, 50, sf::Color::Yellow, sf::Color::Black, sf::Color::Red, std::string("Press Enter"), &m_ftArial);
+
+	/*-------------------------LICENSE ELEMENTS-----------------------*/
+	if (!texture.loadFromFile("./Assets/Textures/Logo.png"))
+	{
+		cout << "cant load logo" << endl;
+	}
+	alpha = 0;
+	licenseSprite.setTexture(texture);
+	licenseSprite.setPosition(50, 0);
+	licenseSprite.setColor(sf::Color(255, 255, 255, alpha));
+	/*----------------------------------------------------------------*/
+	/*-------------------------SPLASH ELEMENTS------------------------*/
+	if (!splashTexture.loadFromFile("./Assets/Textures/splash.png"))
+	{
+		cout << "Can't load splash" << endl;
+	}
+	splashSprite.setTexture(splashTexture);
+	splashSprite.setPosition(50, 100);
+	splashSprite.setColor(sf::Color(255, 255, 255, alpha));
+	m_lblSplashScreen.intialise("Press Enter to Start", sf::Vector2f(400, 500), &m_ftArial);
+	/*----------------------------------------------------------------*/
+	if (!m_bgMusic.openFromFile("./Assets/Audio/beat.ogg"))
+	{
+		std::cout << "BG MUSIC FILE NOT FOUND" << std::endl;
+	}
+	m_bgMusic.play();
+	m_bgMusic.setLoop(true);
 }
 void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fragmentShaderPath)
 {
@@ -345,23 +398,102 @@ void Game::loadTexture(GLuint &texture, std::string fileName)
 }
 void Game::update(sf::Time timeSinceLast)
 {
-	m_lblScore.setText("Score: " + std::to_string(score));
-	triangleRect.setPosition(playerModel[3].x, playerModel[3].z);
-#if (DEBUG >= 2)
-	DEBUG_MSG("Updating...");
-#endif
-	for (size_t i = 0; i < 6; i++)
+	switch (currentScreen)
 	{
-		cubeRect.setPosition(cubeModel[i][3].x, cubeModel[i][3].z);
-		if (cubeRect.getGlobalBounds().intersects(triangleRect.getGlobalBounds()))
+	case GameState::License:
+	{
+		m_cumlativeTime += timeSinceLast;
+		std::cout << m_cumlativeTime.asSeconds() << std::endl;
+		licenseSprite.setColor(sf::Color(255, 255, 255, alpha));
+
+		if (alpha < 255 && m_cumlativeTime.asSeconds() < 150)
 		{
-			std::cout << "HIT" << std::endl;
+			alpha++;
 		}
-		else
+
+		else if (m_cumlativeTime.asSeconds() > 200 && alpha > 0)
 		{
-			//std::cout << ""<<std::endl;
+			alpha--;
 		}
+
+		if (m_cumlativeTime.asSeconds() > 270)
+		{
+			currentScreen = GameState::Splash;
+			m_cumlativeTime = m_cumlativeTime.Zero;
+
+		}
+		break;
 	}
+	case GameState::Splash:
+	{
+		m_cumlativeTime += timeSinceLast;
+		if (alpha < 255 && m_cumlativeTime.asSeconds() < 100)
+		{
+			alpha+= 5;
+		}
+		splashSprite.setColor(sf::Color(255, 255, 255, alpha));
+		if (Keyboard::isKeyPressed(Keyboard::Return) || (gamePad.m_currentState.A && !gamePad.m_previousState.A))
+		{
+
+			currentScreen = GameState::Play;
+			startGame();
+
+		}
+		break;
+	}
+	case GameState::End:
+	{
+		m_endScreenScore.setText("Score: " + std::to_string((int)score));
+		if (Keyboard::isKeyPressed(Keyboard::Return) || (gamePad.m_currentState.A && !gamePad.m_previousState.A))
+		{
+
+			currentScreen = GameState::Play;
+			startGame();
+
+		}
+		break;
+	}
+	case GameState::Play:
+	{
+		m_lblScore.setText("Score: " + std::to_string((int)score));
+		triangleRect.setPosition(playerModel[3].x, playerModel[3].z);
+#if (DEBUG >= 2)
+		DEBUG_MSG("Updating...");
+#endif
+		for (size_t i = 0; i < 6; i++)
+		{
+			cubeRect.setPosition(cubeModel[i][3].x, cubeModel[i][3].z);
+			if (cubeRect.getGlobalBounds().intersects(triangleRect.getGlobalBounds()))
+			{
+				std::cout << "HIT" << std::endl;
+				currentScreen = GameState::End;
+			}
+			else
+			{
+				//std::cout << ""<<std::endl;
+			}
+		}
+
+
+		if (count > 300)
+		{
+			cubeSpeed += 0.001f;
+			count = 0;
+		}
+		if (cubeSpeed > playerSpeed)
+		{
+			playerSpeed = cubeSpeed + 0.02f;
+		}
+		count++;
+		moveCubes();
+		break;
+	}
+	default:
+		break;
+	}
+}
+void Game::moveCubes()
+{
 	for (size_t i = 0; i < 6; i++)
 	{
 		if (i != 0)
@@ -371,23 +503,9 @@ void Game::update(sf::Time timeSinceLast)
 		if (cubeModel[i][3].z > 12)
 		{
 			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, -500));
+			score += (10 + cubeSpeed);
 		}
 	}
-
-	if (count > 300)
-	{
-		cubeSpeed += 0.001f;
-		count = 0;
-	}
-	if (cubeSpeed > playerSpeed)
-	{
-		playerSpeed = cubeSpeed + 0.02f;
-	}
-	count++;
-}
-void Game::moveCubes()
-{
-
 }
 void Game::render(sf::Time time)
 {
@@ -400,30 +518,12 @@ void Game::render(sf::Time time)
 	// https://www.sfml-dev.org/documentation/2.0/classsf_1_1RenderTarget.php#a8d1998464ccc54e789aaf990242b47f7
 	window.pushGLStates();
 
-	m_lblScore.draw(&window);
+	renderSFML();
 
 	window.popGLStates();
-	glBindBuffer(GL_ARRAY_BUFFER, cubeVao);
-	glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVib);
-	for (size_t i = 0; i < 6; i++)
-	{
-		if (i < 3)
-			cubeRender(cubeModel[i], cubeProgID[1], to[0]);
-		else
-			cubeRender(cubeModel[i], cubeProgID[2], to[0]);
-	}
 
-	glBindBuffer(GL_ARRAY_BUFFER, barrierVao);
-	glBindBuffer(GL_ARRAY_BUFFER, barrierVbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, barrierVib);
-	barrierRender(barrierModel[0], barrierProgID);
-	barrierRender(barrierModel[1], barrierProgID);
-
-	glBindBuffer(GL_ARRAY_BUFFER, playerVao);
-	glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, playerVib);
-	playerRender(playerModel, playerProgID);
+	renderOGL();
+	
 
 	window.display();
 
@@ -544,4 +644,160 @@ void Game::readIDs(GLuint &prog)
 	textureID = glGetUniformLocation(prog, "f_texture");
 	mvpID = glGetUniformLocation(prog, "sv_mvp");
 	timeID = glGetUniformLocation(prog, "time");
+}
+void Game::startGame()
+{// Projection Matrix 
+	projection = perspective(
+		45.0f,					// Field of View 45 degrees
+		4.0f / 3.0f,			// Aspect ratio
+		0.1f,					// Display Range Min : 0.1f unit
+		500.0f					// Display Range Max : 500.0f unit
+	);
+
+	// Camera Matrix
+	view = lookAt(
+		vec3(0.0f, 4.0f, 10.0f),	// Camera (x,y,z), in World Space
+		vec3(0.0f, 0.0f, 0.0f),		// Camera looking at origin
+		vec3(0.0f, 1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
+	);
+	for (int i = 0; i < NUM_OF_CUBES; i++)
+	{
+		// cubeModel matrix
+		cubeModel[i] = mat4(1.0f);// Identity Matrix
+
+
+	}
+	playerModel = mat4(1.0f);
+	barrierModel[0] = mat4(1.0f);
+	barrierModel[1] = mat4(1.0f);
+
+	cubeModel[0] = translate(cubeModel[0], vec3(-2, 0, -500));
+	cubeModel[1] = translate(cubeModel[1], vec3(4, 0, -400));
+	cubeModel[2] = translate(cubeModel[2], vec3(-6, 0, -700));
+	cubeModel[3] = translate(cubeModel[3], vec3(8, 0, -400));
+	cubeModel[4] = translate(cubeModel[4], vec3(-8, 0, -500));
+	cubeModel[5] = translate(cubeModel[5], vec3(0, 0, -600));
+
+	barrierModel[0] = translate(barrierModel[0], vec3(-10, 0, 0));
+	barrierModel[1] = translate(barrierModel[1], vec3(10, 0, 0));
+
+	//playerModel = rotate(playerModel, 0.2f, vec3(1, 0, 0));
+	viewNormal = view;
+	viewMoveLeft = rotate(view, 0.2f, vec3(0, 0, 1));
+	viewMoveRight = rotate(view, -0.2f, vec3(0, 0, 1));
+
+	playerMoveLeft = rotate(playerModel, -0.02f, vec3(0, 0, 1));
+	playerMoveRight = rotate(playerModel, 0.02f, vec3(0, 0, 1));
+	playerNormal = playerModel;
+
+	triangleRect.setSize(sf::Vector2f(1, 1));
+	cubeRect.setSize(sf::Vector2f(2, 2));
+	score = 0;
+	cubeSpeed = 0;
+}
+void Game::gamePadControl()
+{
+	gamePad.update();
+	float analogueDivider = 1000;
+	float leftAnalogue = gamePad.m_currentState.LeftThumbStick.x;
+	if (leftAnalogue < -20)
+	{
+		if (playerModel[3].x > -8.8) {
+			// Set cubeModel Rotation
+			playerModel = translate(playerModel, vec3(leftAnalogue / analogueDivider, 0, 0));
+			playerMoveLeft = translate(playerModel, vec3(leftAnalogue / analogueDivider, 0, 0));
+			playerMoveRight = translate(playerModel, vec3(leftAnalogue / analogueDivider, 0, 0));
+			playerNormal = translate(playerModel, vec3(leftAnalogue / analogueDivider, 0, 0));
+			playerModel = playerMoveLeft;
+
+			viewNormal = translate(viewNormal, vec3(-leftAnalogue / analogueDivider / 2, 0, 0));
+			viewMoveLeft = translate(viewMoveLeft, vec3(-leftAnalogue / analogueDivider / 2, 0, 0));
+			viewMoveRight = translate(viewMoveRight, vec3(-leftAnalogue / analogueDivider / 2, 0, 0));
+			view = viewMoveLeft;
+		}
+	}
+	if (leftAnalogue > 20)
+	{
+		if (playerModel[3].x < 8.8) {
+			playerModel = translate(playerModel, vec3(leftAnalogue / analogueDivider, 0, 0));
+			playerMoveLeft = translate(playerModel, vec3(leftAnalogue / analogueDivider, 0, 0));
+			playerMoveRight = translate(playerModel, vec3(leftAnalogue / analogueDivider, 0, 0));
+			playerNormal = translate(playerModel, vec3(leftAnalogue / analogueDivider, 0, 0));
+			playerModel = playerMoveRight;
+
+			viewNormal = translate(viewNormal, vec3(-leftAnalogue / analogueDivider / 2, 0, 0));
+			viewMoveLeft = translate(viewMoveLeft, vec3(-leftAnalogue / analogueDivider / 2, 0, 0));
+			viewMoveRight = translate(viewMoveRight, vec3(-leftAnalogue / analogueDivider / 2, 0, 0));
+			view = viewMoveRight;
+
+		}
+	}
+}
+void Game::renderSFML()
+{
+	switch (currentScreen)
+	{
+	case GameState::License:
+	{
+		window.draw(licenseSprite);
+		break;
+	}
+	case GameState::Splash:
+	{
+		window.draw(splashSprite);
+		m_lblSplashScreen.draw(&window);
+		break;
+	}
+	case GameState::End:
+	{
+		m_endScreenScore.draw(&window);
+		loseTxt.draw(&window);
+		restartBtn.draw(&window);
+		break;
+	}
+	case GameState::Play:
+	{
+		m_lblScore.draw(&window);
+		break;
+	}
+
+	default:
+		break;
+	}
+}
+void Game::renderOGL()
+{
+	switch (currentScreen)
+	{
+	case GameState::Play:
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVao);
+		glBindBuffer(GL_ARRAY_BUFFER, cubeVbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVib);
+		for (size_t i = 0; i < 6; i++)
+		{
+			if (i < 3)
+				cubeRender(cubeModel[i], cubeProgID[1], to[0]);
+			else
+				cubeRender(cubeModel[i], cubeProgID[2], to[0]);
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, barrierVao);
+		glBindBuffer(GL_ARRAY_BUFFER, barrierVbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, barrierVib);
+		barrierRender(barrierModel[0], barrierProgID);
+		barrierRender(barrierModel[1], barrierProgID);
+
+		glBindBuffer(GL_ARRAY_BUFFER, playerVao);
+		glBindBuffer(GL_ARRAY_BUFFER, playerVbo);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, playerVib);
+		playerRender(playerModel, playerProgID);
+		break;
+	}
+	default:
+	{
+		break;
+	}
+	}
+
 }
