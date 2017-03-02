@@ -48,8 +48,8 @@ private:
 	RenderWindow window;
 	bool isRunning = false;
 	void initialize();
-	void update(sf::Time dt);
-	void render(sf::Time dt);
+	void update();
+	void render();
 	void unload();
 	void createProg(GLuint &prog, std::string vertexShaderPath, std::string fragmentShaderPath);
 	void readIDs(GLuint &prog);
@@ -82,6 +82,7 @@ private:
 		z_offsetID;	// Z offset ID
 	const int NUM_OF_CUBES = 6;
 	mat4 cubeModel[6];
+	mat4 buildingModel[6];
 	//const string filename = ".//Assets//Textures//coordinates.tga";
 	//const string filename = ".//Assets//Textures//cube.tga";
 	//const string filename = ".//Assets//Textures//grid.tga";
@@ -91,13 +92,11 @@ private:
 	//const string filename = ".//Assets//Textures//texture_2.tga";
 	//const string filename = ".//Assets//Textures//uvtemplate.tga";
 	//const string filename = ".//Assets//Textures//box.tga";
+	bool fadingAway = false;
 	Font m_ftArial;
 	Text scoreOutput;
 	float score;
-	sf::Clock clock;
-	const float FPS = 60.0f;
-	const sf::Time timePerFrame = sf::seconds(1.0f / 60.0f);
-	sf::Time timeSinceLastUpdate;
+	
 	sf::RectangleShape a;
 	sf::Music m_bgMusic;
 	GameState currentScreen;

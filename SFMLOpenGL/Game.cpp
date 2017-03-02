@@ -103,16 +103,8 @@ void Game::run()
 				window.close();
 			}
 		}
-		//get the time since last update and restart the clock
-		timeSinceLastUpdate += clock.restart();
-		//update every 60th of a second
-		if (timeSinceLastUpdate > timePerFrame)
-		{
-			timeSinceLastUpdate -= timePerFrame;
-			update(timeSinceLastUpdate);
-
-		}
-		render(timeSinceLastUpdate);
+		update();
+		render();
 
 	}
 
@@ -160,9 +152,9 @@ void Game::initialize()
 
 	glEnable(GL_TEXTURE_2D);
 	glGenTextures(3, &to[0]);
-	loadTexture(to[0], ".//Assets//Textures//texture_2.tga");
-	loadTexture(to[0], ".//Assets//Textures//texture_2.tga");
-	loadTexture(to[0], ".//Assets//Textures//texture_2.tga");
+	loadTexture(to[0], ".//Assets//Textures//texture.tga");
+	loadTexture(to[0], ".//Assets//Textures//texture.tga");
+	loadTexture(to[0], ".//Assets//Textures//texture.tga");
 
 	glGenVertexArrays(1, &barrierVao); //Gen Vertex Array
 	glBindVertexArray(barrierVao);
@@ -196,40 +188,6 @@ void Game::initialize()
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, 3 * player_INDICES * sizeof(GLuint), player_indices, GL_STATIC_DRAW);
 	createProg(playerProgID, "vertexShader0.txt", "fragmentShader1.txt");
 
-	// Projection Matrix 
-	projection = perspective(
-		45.0f,					// Field of View 45 degrees
-		4.0f / 3.0f,			// Aspect ratio
-		0.1f,					// Display Range Min : 0.1f unit
-		500.0f					// Display Range Max : 100.0f unit
-	);
-
-	// Camera Matrix
-	view = lookAt(
-		vec3(0.0f, 4.0f, 10.0f),	// Camera (x,y,z), in World Space
-		vec3(0.0f, 0.0f, 0.0f),		// Camera looking at origin
-		vec3(0.0f, 1.0f, 0.0f)		// 0.0f, 1.0f, 0.0f Look Down and 0.0f, -1.0f, 0.0f Look Up
-	);
-	for (int i = 0; i < NUM_OF_CUBES; i++)
-	{
-		// cubeModel matrix
-		cubeModel[i] = mat4(1.0f);// Identity Matrix
-
-
-	}
-	barrierModel[0] = mat4(1.0f);
-	barrierModel[1] = mat4(1.0f);
-
-	cubeModel[0] = translate(cubeModel[0], vec3(-2, 0, -100));
-	cubeModel[1] = translate(cubeModel[1], vec3(4, 0, 0));
-	cubeModel[4] = translate(cubeModel[4], vec3(-6, 0, 0));
-	cubeModel[3] = translate(cubeModel[3], vec3(8, 0, -30));
-	cubeModel[2] = translate(cubeModel[2], vec3(-8, 0, -30));
-
-	barrierModel[0] = translate(barrierModel[0], vec3(-10, 0, 0));
-	barrierModel[1] = translate(barrierModel[1], vec3(10, 0, 0));
-
-	playerModel = rotate(playerModel, 0.2f, vec3(1, 0, 0));
 	// Enable Depth Test
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS);
@@ -238,11 +196,8 @@ void Game::initialize()
 	viewNormal = view;
 	viewMoveLeft = rotate(view, 0.2f, vec3(0, 0, 1));
 	viewMoveRight = rotate(view, -0.2f, vec3(0, 0, 1));
-	triangleRect.setSize(sf::Vector2f(1, 1));
-	cubeRect.setSize(sf::Vector2f(2, 2));
 	m_ftArial.loadFromFile("./Assets/Fonts/BBrick.ttf");
-	m_lblScore.intialise("Score: ", sf::Vector2f(400, 100), &m_ftArial);
-	score = 0;
+	m_lblScore.intialise("Score: ", sf::Vector2f(500, 50), &m_ftArial);
 
 	startGame();
 
@@ -396,40 +351,42 @@ void Game::loadTexture(GLuint &texture, std::string fileName)
 		img_data				//Image Data
 	);
 }
-void Game::update(sf::Time timeSinceLast)
+void Game::update()
 {
 	switch (currentScreen)
 	{
 	case GameState::License:
 	{
-		m_cumlativeTime += timeSinceLast;
 		std::cout << m_cumlativeTime.asSeconds() << std::endl;
 		licenseSprite.setColor(sf::Color(255, 255, 255, alpha));
 
-		if (alpha < 255 && m_cumlativeTime.asSeconds() < 150)
+		if (alpha < 255 && !fadingAway)
 		{
 			alpha++;
+			if (alpha == 255)
+			{
+				fadingAway = true;
+			}
 		}
 
-		else if (m_cumlativeTime.asSeconds() > 200 && alpha > 0)
+		else if (alpha > 0 && fadingAway)
 		{
 			alpha--;
 		}
 
-		if (m_cumlativeTime.asSeconds() > 270)
+		if (fadingAway && alpha == 0)
 		{
 			currentScreen = GameState::Splash;
 			m_cumlativeTime = m_cumlativeTime.Zero;
-
 		}
 		break;
 	}
 	case GameState::Splash:
 	{
-		m_cumlativeTime += timeSinceLast;
-		if (alpha < 255 && m_cumlativeTime.asSeconds() < 100)
+		
+		if (alpha < 255)
 		{
-			alpha+= 5;
+			alpha++;
 		}
 		splashSprite.setColor(sf::Color(255, 255, 255, alpha));
 		if (Keyboard::isKeyPressed(Keyboard::Return) || (gamePad.m_currentState.A && !gamePad.m_previousState.A))
@@ -477,12 +434,8 @@ void Game::update(sf::Time timeSinceLast)
 
 		if (count > 300)
 		{
-			cubeSpeed += 0.001f;
+			cubeSpeed += 0.05f;
 			count = 0;
-		}
-		if (cubeSpeed > playerSpeed)
-		{
-			playerSpeed = cubeSpeed + 0.02f;
 		}
 		count++;
 		moveCubes();
@@ -496,18 +449,20 @@ void Game::moveCubes()
 {
 	for (size_t i = 0; i < 6; i++)
 	{
-		if (i != 0)
-			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, cubeSpeed + i / 4.0f));
-		else
-			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, cubeSpeed + 0.2 / 0.5f));
+		cubeModel[i] = translate(cubeModel[i], vec3(0, 0, cubeSpeed));
 		if (cubeModel[i][3].z > 12)
 		{
-			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, -500));
+			cubeModel[i] = translate(cubeModel[i], vec3(0, 0, -600));
 			score += (10 + cubeSpeed);
+		}
+		buildingModel[i] = translate(buildingModel[i], vec3(0, 0, 0.002));
+		if (buildingModel[i][3].z > 500)
+		{
+			buildingModel[i] = translate(buildingModel[i], vec3(0, 0, -3.0));
 		}
 	}
 }
-void Game::render(sf::Time time)
+void Game::render()
 {
 
 #if (DEBUG >= 2)
@@ -521,6 +476,7 @@ void Game::render(sf::Time time)
 	renderSFML();
 
 	window.popGLStates();
+	
 
 	renderOGL();
 	
@@ -536,6 +492,7 @@ void Game::render(sf::Time time)
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
+	glTexEnvfv(0, 0, 0);
 }
 void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
 {
@@ -651,7 +608,7 @@ void Game::startGame()
 		45.0f,					// Field of View 45 degrees
 		4.0f / 3.0f,			// Aspect ratio
 		0.1f,					// Display Range Min : 0.1f unit
-		500.0f					// Display Range Max : 500.0f unit
+		400.0f					// Display Range Max : 500.0f unit
 	);
 
 	// Camera Matrix
@@ -664,22 +621,29 @@ void Game::startGame()
 	{
 		// cubeModel matrix
 		cubeModel[i] = mat4(1.0f);// Identity Matrix
-
-
+		buildingModel[i] = mat4(1.0f);
+		buildingModel[i] = translate(buildingModel[i], vec3(0, -15, 0));
+		if (i % 2 == 0)
+		buildingModel[i] = translate(buildingModel[i], vec3(0, 0, -800));
+		if (i < 2)
+			buildingModel[i] = translate(buildingModel[i], vec3(-40, 0, 0));
+		else if (i >= 4)
+			buildingModel[i] = translate(buildingModel[i], vec3(40, -0, 0));
+		buildingModel[i] = scale(buildingModel[i], vec3(10, 15, 600));
 	}
 	playerModel = mat4(1.0f);
 	barrierModel[0] = mat4(1.0f);
 	barrierModel[1] = mat4(1.0f);
 
-	cubeModel[0] = translate(cubeModel[0], vec3(-2, 0, -500));
-	cubeModel[1] = translate(cubeModel[1], vec3(4, 0, -400));
-	cubeModel[2] = translate(cubeModel[2], vec3(-6, 0, -700));
-	cubeModel[3] = translate(cubeModel[3], vec3(8, 0, -400));
-	cubeModel[4] = translate(cubeModel[4], vec3(-8, 0, -500));
-	cubeModel[5] = translate(cubeModel[5], vec3(0, 0, -600));
+	cubeModel[0] = translate(cubeModel[0], vec3(-2, 2, -500));
+	cubeModel[1] = translate(cubeModel[1], vec3(4, 2, -400));
+	cubeModel[2] = translate(cubeModel[2], vec3(-6, 2, -700));
+	cubeModel[3] = translate(cubeModel[3], vec3(8, 2,-700));
+	cubeModel[4] = translate(cubeModel[4], vec3(-8, 2, -500));
+	cubeModel[5] = translate(cubeModel[5], vec3(0, 2, -600));
 
-	barrierModel[0] = translate(barrierModel[0], vec3(-10, 0, 0));
-	barrierModel[1] = translate(barrierModel[1], vec3(10, 0, 0));
+	barrierModel[0] = translate(barrierModel[0], vec3(-10, 1, 0));
+	barrierModel[1] = translate(barrierModel[1], vec3(10, 1, 0));
 
 	//playerModel = rotate(playerModel, 0.2f, vec3(1, 0, 0));
 	viewNormal = view;
@@ -693,7 +657,7 @@ void Game::startGame()
 	triangleRect.setSize(sf::Vector2f(1, 1));
 	cubeRect.setSize(sf::Vector2f(2, 2));
 	score = 0;
-	cubeSpeed = 0;
+	cubeSpeed = 0.05;
 }
 void Game::gamePadControl()
 {
@@ -776,6 +740,7 @@ void Game::renderOGL()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVib);
 		for (size_t i = 0; i < 6; i++)
 		{
+			cubeRender(buildingModel[i], cubeProgID[1], to[0]);
 			if (i < 3)
 				cubeRender(cubeModel[i], cubeProgID[1], to[0]);
 			else
