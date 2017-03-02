@@ -10,8 +10,8 @@
 #define player_H
 
 #include <gl/glew.h>
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 const int player_VERTICES = 9;	// Total Number of Vertices
 const int player_INDICES = 3;	// Total Number of Indexes
 const int player_COLORS = 9;	// Total Number of Colors

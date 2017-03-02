@@ -48,9 +48,6 @@
     <ClInclude Include="Buttons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Checkbox.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Label.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -58,12 +55,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ScreenManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Screens.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Slider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Widget.h">
@@ -86,13 +77,7 @@
     <ClCompile Include="Buttons.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Checkbox.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Label.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Slider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Widget.cpp">
@@ -159,6 +144,9 @@
       <Filter>Resource Files</Filter>
     </Text>
     <Text Include="BarrierFragShader.txt">
+      <Filter>Resource Files</Filter>
+    </Text>
+    <Text Include="cubeFrag0.txt">
       <Filter>Resource Files</Filter>
     </Text>
   </ItemGroup>

@@ -11,8 +11,8 @@
 #include <GL/glew.h>
 #include <GL/wglew.h>
 //GLM
-#include <glm.hpp>
-#include <gtc/matrix_transform.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 //SFML
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>
@@ -53,8 +53,8 @@ private:
 	void unload();
 	void createProg(GLuint &prog, std::string vertexShaderPath, std::string fragmentShaderPath);
 	void readIDs(GLuint &prog);
-	void loadTexture(GLuint &texture, std::string fileName);
-	void cubeRender(mat4 &model, GLuint &prog, GLuint &texture);
+	void loadTexture(GLuint texture, std::string fileName);
+	void cubeRender(mat4 &model, GLuint &prog, GLuint texture);
 	void barrierRender(mat4 &model, GLuint &prog);
 	void playerRender(mat4 &model, GLuint &prog);
 	void moveCubes();
@@ -70,7 +70,7 @@ private:
 	GLuint	vsid,		// Vertex Shader ID
 		fsid,		// Fragment Shader ID
 		cubeVao = 0,	// Vertex Array ID
-		to[1];	// Texture ID 1 to 32
+		to[2];	// Texture ID 1 to 32
 	GLuint positionID,	// Position ID
 		colorID,	// Color ID
 		textureID,	// Texture ID

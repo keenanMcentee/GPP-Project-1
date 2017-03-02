@@ -150,11 +150,15 @@ void Game::initialize()
 	createProg(cubeProgID[1], "vertexShader0.txt", "fragmentShader2.txt");
 	createProg(cubeProgID[2], "vertexShader0.txt", "fragmentShader3.txt");
 
+
 	glEnable(GL_TEXTURE_2D);
-	glGenTextures(3, &to[0]);
-	loadTexture(to[0], ".//Assets//Textures//texture.tga");
-	loadTexture(to[0], ".//Assets//Textures//texture.tga");
-	loadTexture(to[0], ".//Assets//Textures//texture.tga");
+	glGenTextures(2, &to[0]);
+	//loadTexture(to[0], ".//Assets//Textures//texture.tga");
+	//loadTexture(to[1], ".//Assets//Textures//texture2.tga");
+
+	loadTexture(0, ".//Assets//Textures//texture.tga");
+	loadTexture(1, ".//Assets//Textures//texture2.tga");
+
 
 	glGenVertexArrays(1, &barrierVao); //Gen Vertex Array
 	glBindVertexArray(barrierVao);
@@ -203,7 +207,7 @@ void Game::initialize()
 
 	loseTxt.intialise("Game Over", sf::Vector2f(300, 200), &m_ftArial, sf::Color::Yellow, 0, 128);
 	m_endScreenScore.intialise("Score: ", sf::Vector2f(360, 400), &m_ftArial);
-	restartBtn.initialise(sf::Vector2f(600, 500), 250, 50, sf::Color::Yellow, sf::Color::Black, sf::Color::Red, std::string("Press Enter"), &m_ftArial);
+	restartBtn.initialise(sf::Vector2f(600, 500), 250, 50, sf::Color::White, sf::Color::Green, sf::Color::Yellow, std::string("Press Enter"), &m_ftArial);
 
 	/*-------------------------LICENSE ELEMENTS-----------------------*/
 	if (!texture.loadFromFile("./Assets/Textures/Logo.png"))
@@ -316,10 +320,9 @@ void Game::createProg(GLuint &prog, std::string vertexShaderPath, std::string fr
 	glUseProgram(prog);
 
 }
-void Game::loadTexture(GLuint &texture, std::string fileName)
+void Game::loadTexture(GLuint texture, std::string fileName)
 {
 	img_data = stbi_load(fileName.c_str(), &width, &height, &comp_count, 4);
-
 	if (img_data == NULL)
 	{
 		DEBUG_MSG("ERROR: Texture not loaded");
@@ -494,7 +497,7 @@ void Game::render()
 	glBindVertexArray(0);
 	glTexEnvfv(0, 0, 0);
 }
-void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
+void Game::cubeRender(mat4 &model, GLuint &prog, GLuint texture)
 {
 
 	mvp = projection * view * (model);
@@ -511,8 +514,8 @@ void Game::cubeRender(mat4 &model, GLuint &prog, GLuint &texture)
 	glUniformMatrix4fv(mvpID, 1, GL_FALSE, &mvp[0][0]);
 
 	//Set Active Texture .... 32
-	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(1, 0);
+	glActiveTexture(GL_TEXTURE0 +texture);
+	glUniform1i(textureID, texture);
 
 	//Set pointers for each parameter (with appropriate starting positions)
 	//https://www.khronos.org/opengles/sdk/docs/man/xhtml/glVertexAttribPointer.xml
@@ -740,11 +743,11 @@ void Game::renderOGL()
 		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, cubeVib);
 		for (size_t i = 0; i < 6; i++)
 		{
-			cubeRender(buildingModel[i], cubeProgID[1], to[0]);
+			cubeRender(buildingModel[i], cubeProgID[2], 1);
 			if (i < 3)
-				cubeRender(cubeModel[i], cubeProgID[1], to[0]);
+				cubeRender(cubeModel[i], cubeProgID[1], 0);
 			else
-				cubeRender(cubeModel[i], cubeProgID[2], to[0]);
+				cubeRender(cubeModel[i], cubeProgID[1], 0);
 		}
 
 		glBindBuffer(GL_ARRAY_BUFFER, barrierVao);

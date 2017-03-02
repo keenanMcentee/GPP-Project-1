@@ -10,7 +10,7 @@
 #define BARRIER_H
 
 #include <gl/glew.h>
-#include <gtc/matrix_transform.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 const int BARRIER_VERTICES = 8;	// Total Number of Vertices
 const int BARRIER_INDICES = 4;	// Total Number of Indexes
 const int BARRIER_COLORS = 8;	// Total Number of Colors
